@@ -1,0 +1,142 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="#05050f" name="theme-color" />
+    <title>🔧 Service Unavailable - AI Lab Pro</title>
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/503.css" />
+  </head>
+  <body>
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+
+    <div class="container">
+      <!-- Top Actions -->
+      <div class="top-actions">
+        <button
+          aria-label="Toggle Language"
+          class="icon-btn"
+          id="lang-toggle"
+          title="Language / زبان"
+        >
+          <span id="lang-flag">🇺🇸</span>
+        </button>
+        <button aria-label="Toggle Theme" class="icon-btn" id="theme-toggle" title="Theme / تم">
+          <svg
+            fill="none"
+            id="theme-icon"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Main Error Card -->
+      <main class="error-card">
+        <span class="error-code">
+          <span class="pulse-dot"></span>
+          <span>HTTP 503 · Service Unavailable</span>
+        </span>
+
+        <div class="big-icon">🔧</div>
+
+        <h1 class="error-title" data-i18n="title">Service Temporarily Unavailable</h1>
+        <p class="error-message" data-i18n="message">
+          The server is currently undergoing maintenance or temporarily overloaded. Please wait a
+          moment while we restore the service.
+        </p>
+
+        <!-- Progress Ring Timer -->
+        <div class="progress-ring">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="progressGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#fbbf24" />
+                <stop offset="100%" stop-color="#fb923c" />
+              </linearGradient>
+            </defs>
+            <circle class="bg-circle" cx="60" cy="60" r="52" />
+            <circle
+              class="progress-circle"
+              cx="60"
+              cy="60"
+              id="progress-circle"
+              r="52"
+              stroke-dasharray="326.7"
+              stroke-dashoffset="0"
+            />
+          </svg>
+          <div class="progress-text" id="progress-text">10</div>
+        </div>
+
+        <div class="retry-box">
+          <div class="retry-label" data-i18n="autoRetry">Auto-retry in</div>
+          <div class="retry-timer" id="retry-timer">10s</div>
+          <div class="retry-hint" data-i18n="retryHint">We'll automatically try to reconnect</div>
+        </div>
+
+        <div class="status-info">
+          <span class="status-dot"></span>
+          <span data-i18n="statusLabel">Server Status:</span>
+          <strong data-i18n="statusValue" style="color: var(--accent-yellow)"
+            >Maintenance Mode</strong
+          >
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="retry-btn">
+            <span class="btn-icon">🔄</span>
+            <span data-i18n="retryNow">Retry Now</span>
+          </button>
+          <a class="btn btn-secondary" href="/">
+            <span class="btn-icon">🏠</span>
+            <span data-i18n="goHome">Back to Home</span>
+          </a>
+          <button class="btn btn-secondary" id="status-btn">
+            <span class="btn-icon">📊</span>
+            <span data-i18n="checkStatus">Check Status</span>
+          </button>
+        </div>
+
+        <footer class="footer">
+          <p>
+            <span data-i18n="footerHelp"
+              >Press <kbd>R</kbd> to retry • <kbd>T</kbd> theme • <kbd>?</kbd> help</span
+            >
+          </p>
+          <p style="margin-top: 0.5rem">
+            <a href="/">AI Lab Pro</a> ·
+            <span data-i18n="footerMade">Made with ❤️</span>
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="help-modal" onclick="closeHelp(event)">
+      <div class="help-content" onclick="event.stopPropagation()">
+        <h3 data-i18n="helpTitle">Keyboard Shortcuts</h3>
+        <ul>
+          <li><span data-i18n="helpRetry">Retry now</span> <kbd>R</kbd></li>
+          <li><span data-i18n="helpTheme">Toggle theme</span> <kbd>T</kbd></li>
+          <li><span data-i18n="helpHelp">Show this help</span> <kbd>?</kbd></li>
+          <li><span data-i18n="helpHome">Go to home</span> <kbd>H</kbd></li>
+        </ul>
+      </div>
+    </div>
+
+  <script src="js/503.js"></script>
+  </body>
+</html>

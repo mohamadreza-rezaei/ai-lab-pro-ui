@@ -1,0 +1,165 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="#05050f" name="theme-color" />
+    <title>💥 Server Error - AI Lab Pro</title>
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/500.css" />
+  </head>
+  <body>
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="glitch"></div>
+
+    <div class="container">
+      <!-- Top Actions -->
+      <div class="top-actions">
+        <button
+          aria-label="Toggle Language"
+          class="icon-btn"
+          id="lang-toggle"
+          title="Language / زبان"
+        >
+          <span id="lang-flag">🇺🇸</span>
+        </button>
+        <button aria-label="Toggle Theme" class="icon-btn" id="theme-toggle" title="Theme / تم">
+          <svg
+            fill="none"
+            id="theme-icon"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Main Error Card -->
+      <main class="error-card">
+        <span class="error-code">
+          <span class="pulse-dot"></span>
+          <span>HTTP 500 · Internal Server Error</span>
+        </span>
+
+        <div class="big-icon">💥</div>
+
+        <h1 class="error-title" data-i18n="title">Something Went Wrong</h1>
+        <p class="error-message" data-i18n="message">
+          An unexpected error occurred on our server. Our team has been notified and is working to
+          fix the issue. Please try again in a few moments.
+        </p>
+
+        <!-- Error Details -->
+        <div class="error-details">
+          <div class="detail-row">
+            <span class="detail-label">🆔 <span data-i18n="errorIdLabel">Error ID</span></span>
+            <span class="detail-value">
+              <span id="error-id">ERR-2026-XXXXXX</span>
+              <button class="copy-btn" data-i18n="copyBtn" id="copy-error-id">Copy</button>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">⏰ <span data-i18n="timestampLabel">Timestamp</span></span>
+            <span class="detail-value" id="timestamp">--</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">🌐 <span data-i18n="pathLabel">Path</span></span>
+            <span class="detail-value" id="path">/</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">🔧 <span data-i18n="methodLabel">Method</span></span>
+            <span class="detail-value" id="method">GET</span>
+          </div>
+        </div>
+
+        <!-- Stack Trace Toggle -->
+        <div class="stack-section">
+          <button class="stack-toggle" id="stack-toggle">
+            <span class="stack-arrow">▶</span>
+            <span data-i18n="showDetails">Show Technical Details</span>
+          </button>
+          <div class="stack-trace" id="stack-trace">
+            <div class="stack-line">
+              <span class="func">Traceback</span> (most recent call last):
+            </div>
+            <div class="stack-line">
+              <span class="file">File</span> "/app/server.py"<span class="line-num">, line 142</span
+              >, in <span class="func">handle_request</span>
+            </div>
+            <div class="stack-line">
+              <span class="file">result</span> = await process_data(payload)
+            </div>
+            <div class="stack-line">
+              <span class="file">File</span> "/app/core/processor.py"<span class="line-num"
+                >, line 87</span
+              >, in <span class="func">process_data</span>
+            </div>
+            <div class="stack-line">
+              <span class="file">data</span> = await fetch_from_db(query)
+            </div>
+            <div class="stack-line">
+              <span class="func">ConnectionError</span>: Failed to connect to database
+            </div>
+            <div class="stack-line">
+              <span class="file">hint</span>: Check database connection pool settings
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+          <button class="btn btn-primary" id="retry-btn">
+            <span class="btn-icon">🔄</span>
+            <span data-i18n="retry">Try Again</span>
+          </button>
+          <a class="btn btn-secondary" href="/">
+            <span class="btn-icon">🏠</span>
+            <span data-i18n="goHome">Back to Home</span>
+          </a>
+          <a class="btn btn-danger" href="#" id="report-btn">
+            <span class="btn-icon">🐛</span>
+            <span data-i18n="report">Report Issue</span>
+          </a>
+        </div>
+
+        <footer class="footer">
+          <p>
+            <span data-i18n="footerHelp"
+              >Press <kbd>R</kbd> to retry • <kbd>T</kbd> theme • <kbd>?</kbd> help</span
+            >
+          </p>
+          <p style="margin-top: 0.5rem">
+            <span data-i18n="needHelp">Need help?</span>
+            <a data-i18n="contactSupport" href="#" id="contact-link">Contact Support</a>
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="help-modal" onclick="closeHelp(event)">
+      <div class="help-content" onclick="event.stopPropagation()">
+        <h3 data-i18n="helpTitle">Keyboard Shortcuts</h3>
+        <ul>
+          <li><span data-i18n="helpRetry">Try again</span> <kbd>R</kbd></li>
+          <li><span data-i18n="helpTheme">Toggle theme</span> <kbd>T</kbd></li>
+          <li><span data-i18n="helpHelp">Show this help</span> <kbd>?</kbd></li>
+          <li><span data-i18n="helpHome">Go to home</span> <kbd>H</kbd></li>
+          <li><span data-i18n="helpCopy">Copy error ID</span> <kbd>C</kbd></li>
+        </ul>
+      </div>
+    </div>
+
+  <script src="js/500.js"></script>
+  </body>
+</html>
