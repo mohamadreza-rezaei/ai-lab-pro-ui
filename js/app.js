@@ -253,24 +253,21 @@ URL Builders (the core of the routing logic)
 ============================================ */
 function getServiceUrl(svc) {
   if (state.env === 'local') {
-    return `http://185.250.249.186:${svc.localPort}${svc.urlPath || ''}`;
-    // return `http://localhost:${svc.localPort}${svc.urlPath || ''}`;
+    return `http://localhost:${svc.localPort}${svc.urlPath || ''}`;
   }
   return `https://${svc.subdomain}.${state.baseDomain}${svc.urlPath || ''}`;
 }
 
 function getServiceHealth(svc) {
   if (state.env === 'local') {
-    return `http://185.250.249.186:${svc.localPort}${svc.healthPath || '/'}`;
-    // return `http://localhost:${svc.localPort}${svc.healthPath || '/'}`;
+    return `http://localhost:${svc.localPort}${svc.healthPath || '/'}`;
   }
   return `https://${svc.subdomain}.${state.baseDomain}${svc.healthPath || '/'}`;
 }
 
 function getServiceDisplay(svc) {
   if (state.env === 'local') {
-    return `185.250.249.186:${svc.localPort}${svc.urlPath || ''}`;
-    // return `localhost:${svc.localPort}${svc.urlPath || ''}`;
+    return `localhost:${svc.localPort}${svc.urlPath || ''}`;
   }
   return `${svc.subdomain}.${state.baseDomain}${svc.urlPath || ''}`;
 }
@@ -280,8 +277,7 @@ function getApiBaseUrl() {
   const litellm = services.find((s) => s.name === 'LiteLLM');
   if (!litellm) return window.location.origin;
   if (state.env === 'local') {
-    return `http://185.250.249.186:${litellm.localPort}`;
-    // return `http://localhost:${litellm.localPort}`;
+    return `http://localhost:${litellm.localPort}`;
   }
   return `https://${litellm.subdomain}.${state.baseDomain}`;
 }
