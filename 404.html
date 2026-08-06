@@ -1,62 +1,158 @@
-<!doctype html>
-<html lang="en">
-
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Page Not Found</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    * {
-      line-height: 1.2;
-      margin: 0;
-    }
-
-    html {
-      color: #888;
-      display: table;
-      font-family: sans-serif;
-      height: 100%;
-      text-align: center;
-      width: 100%;
-    }
-
-    body {
-      display: table-cell;
-      vertical-align: middle;
-      margin: 2em auto;
-    }
-
-    h1 {
-      color: #555;
-      font-size: 2em;
-      font-weight: 400;
-    }
-
-    p {
-      margin: 0 auto;
-      width: 280px;
-    }
-
-    @media only screen and (max-width: 280px) {
-
-      body,
-      p {
-        width: 95%;
-      }
-
-      h1 {
-        font-size: 1.5em;
-        margin: 0 0 0.3em;
-      }
-
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="#05050f" name="theme-color">
+  <title>🔍 Page Not Found - AI Lab Pro</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <link href="css/404.css" rel="stylesheet">
 </head>
-
 <body>
-  <h1>Page Not Found</h1>
-  <p>Sorry, but the page you were trying to view does not exist.</p>
-</body>
+<div class="bg-gradient"></div>
+<div class="bg-grid"></div>
+<div class="particles" id="particles"></div>
 
+<div class="container">
+  <!-- Top Actions -->
+  <div class="top-actions">
+    <button aria-label="Toggle Language" class="icon-btn" id="lang-toggle" title="Language / زبان">
+      <span id="lang-flag">🇺🇸</span>
+    </button>
+    <button aria-label="Toggle Theme" class="icon-btn" id="theme-toggle" title="Theme / تم">
+      <svg fill="none" id="theme-icon" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-linecap="round"
+              stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Main Card -->
+  <main class="error-card">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span>🏠</span>
+      <span>/</span>
+      <span class="breadcrumb-path" id="breadcrumb-path">/path-not-found</span>
+    </div>
+
+    <!-- Big Icon -->
+    <div class="big-icon">🛰️</div>
+
+    <!-- Big 404 -->
+    <div class="big-404">404</div>
+
+    <!-- Title & Message -->
+    <h1 class="error-title" data-i18n="title">Lost in Cyberspace</h1>
+    <p class="error-message" data-i18n="message">
+      The page you're looking for has drifted into the void. It might have been moved, deleted, or perhaps never existed in this dimension.
+    </p>
+
+    <!-- Quick Search -->
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input autocomplete="off" class="search-input" data-i18n-placeholder="searchPlaceholder"
+             id="search" placeholder="Search for services..." spellcheck="false" type="text">
+    </div>
+
+    <!-- Suggested Services -->
+    <div class="suggestions">
+      <div class="suggestions-title">
+        <span data-i18n="orVisit">Or visit one of these</span>
+      </div>
+      <div class="suggestions-grid">
+        <a class="suggestion-card" href="/">
+          <span class="suggestion-icon">🏠</span>
+          <span class="suggestion-name" data-i18n="home">Home</span>
+          <span class="suggestion-url">/</span>
+        </a>
+        <a class="suggestion-card" href="/chat/">
+          <span class="suggestion-icon">💬</span>
+          <span class="suggestion-name">Open WebUI</span>
+          <span class="suggestion-url">/chat/</span>
+        </a>
+        <a class="suggestion-card" href="/grafana/">
+          <span class="suggestion-icon">📊</span>
+          <span class="suggestion-name">Grafana</span>
+          <span class="suggestion-url">/grafana/</span>
+        </a>
+        <a class="suggestion-card" href="/api/v1/">
+          <span class="suggestion-icon">📖</span>
+          <span class="suggestion-name" data-i18n="api">API</span>
+          <span class="suggestion-url">/api/v1/</span>
+        </a>
+        <a class="suggestion-card" href="/health">
+          <span class="suggestion-icon">❤️</span>
+          <span class="suggestion-name" data-i18n="health">Health</span>
+          <span class="suggestion-url">/health</span>
+        </a>
+        <a class="suggestion-card" href="#" id="go-back-card">
+          <span class="suggestion-icon">⬅️</span>
+          <span class="suggestion-name" data-i18n="goBack">Go Back</span>
+          <span class="suggestion-url">‹ previous</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="stat-paths">42+</div>
+        <div class="stat-label" data-i18n="statPaths">Available Routes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-uptime">99.9%</div>
+        <div class="stat-label" data-i18n="statUptime">Uptime</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-status">🟢</div>
+        <div class="stat-label" data-i18n="statStatus">All Services</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+      <button class="btn btn-primary" id="home-btn">
+        <span class="btn-icon">🚀</span>
+        <span data-i18n="backHome">Beam Me Home</span>
+      </button>
+      <button class="btn btn-secondary" id="back-btn">
+        <span class="btn-icon">⬅️</span>
+        <span data-i18n="goBack">Go Back</span>
+      </button>
+      <button class="btn btn-secondary" id="reload-btn">
+        <span class="btn-icon">🔄</span>
+        <span data-i18n="reload">Reload Page</span>
+      </button>
+    </div>
+
+    <footer class="footer">
+      <p>
+        <span data-i18n="footerHelp">Press <kbd>/</kbd> to search • <kbd>Esc</kbd> back • <kbd>?</kbd> help</span>
+      </p>
+      <p class="easter-egg-hint" data-i18n="easterEgg">
+        💡 Pro tip: Try pressing <kbd>G</kbd> then <kbd>H</kbd> for a secret animation!
+      </p>
+    </footer>
+  </main>
+</div>
+
+<!-- Help Modal -->
+<div class="help-modal" id="help-modal" onclick="closeHelp(event)">
+  <div class="help-content" onclick="event.stopPropagation()">
+    <h3 data-i18n="helpTitle">Keyboard Shortcuts</h3>
+    <ul>
+      <li><span data-i18n="helpSearch">Focus search</span> <kbd>/</kbd></li>
+      <li><span data-i18n="helpBack">Go back</span> <kbd>Esc</kbd></li>
+      <li><span data-i18n="helpHome">Back to home</span> <kbd>H</kbd></li>
+      <li><span data-i18n="helpReload">Reload page</span> <kbd>R</kbd></li>
+      <li><span data-i18n="helpTheme">Toggle theme</span> <kbd>T</kbd></li>
+      <li><span data-i18n="helpHelp">Show this help</span> <kbd>?</kbd></li>
+      <li><span data-i18n="helpSecret">Secret animation</span> <kbd>G</kbd>+<kbd>H</kbd></li>
+    </ul>
+  </div>
+</div>
+
+<script src="js/vendor/404.js"></script>
+</body>
 </html>
-<!-- IE needs 512+ bytes: https://docs.microsoft.com/archive/blogs/ieinternals/friendly-http-error-pages -->
