@@ -848,4 +848,14 @@ function init() {
   );
 }
 
+Object.assign(window, {
+  closeHelp,
+  closeSettings,
+  closeSettingsDirect,
+  copyBaseUrl,
+  openSettings,
+  refreshStatus,
+  saveSettings,
+});
+
 document.addEventListener('DOMContentLoaded', init);
