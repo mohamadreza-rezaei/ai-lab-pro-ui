@@ -164,6 +164,16 @@ const services = [
     healthPath: '/',
   },
   {
+    name: '9Router',
+    icon: '🧭',
+    category: 'ai',
+    desc: {en: 'Quota/cost router for coding agents (Claude Code, Cursor, Codex, Cline)', fa: 'مسیریاب quota/cost برای ابزارهای coding agent (Claude Code، Cursor، Codex، Cline)'},
+    localPort: 20128,
+    subdomain: '9router',
+    urlPath: '/',
+    healthPath: '/',
+  },
+  {
     name: 'n8n',
     icon: '🔄',
     category: 'automation',
