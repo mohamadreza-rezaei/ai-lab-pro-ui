@@ -213,6 +213,16 @@ const services = [
     urlPath: '/',
     healthPath: '/minio/health/live',
   },
+  {
+    name: 'Portainer',
+    icon: '🐳',
+    category: 'monitoring',
+    desc: {en: 'Docker container management UI', fa: 'رابط مدیریت کانتینرهای داکر'},
+    localPort: 9443,
+    subdomain: 'portainer',
+    urlPath: '/',
+    healthPath: '/api/system/status',
+  },
   // {
   //   name: 'MinIO API',
   //   icon: '🪣',
