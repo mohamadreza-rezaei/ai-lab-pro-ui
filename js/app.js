@@ -174,6 +174,16 @@ const services = [
     healthPath: '/',
   },
   {
+    name: 'OmniRoute',
+    icon: '🛣️',
+    category: 'ai',
+    desc: {en: 'Unified AI proxy and dashboard', fa: 'پروکسی و داشبورد یکپارچه هوش مصنوعی'},
+    localPort: 20130,
+    subdomain: 'omniroute',
+    urlPath: '/',
+    healthPath: '/',
+  },
+  {
     name: 'n8n',
     icon: '🔄',
     category: 'automation',
