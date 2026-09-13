@@ -184,6 +184,16 @@ const services = [
     healthPath: '/',
   },
   {
+    name: 'OpenSEO',
+    icon: '📣',
+    category: 'marketing',
+    desc: {en: 'Open-source SEO workspace and agent tools', fa: 'فضای کار سئو متن‌باز و ابزارهای عامل'},
+    localPort: 3003,
+    subdomain: 'openseo',
+    urlPath: '/',
+    healthPath: '/api/health',
+  },
+  {
     name: 'n8n',
     icon: '🔄',
     category: 'automation',
