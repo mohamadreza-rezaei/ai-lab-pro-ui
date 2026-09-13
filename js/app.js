@@ -40,6 +40,7 @@ const i18n = {
     catAutomation: 'Automation',
     catStorage: 'Storage & Data',
     catMonitoring: 'Monitoring',
+    catMarketing: 'Marketing',
     statusOnline: '● Online',
     statusOffline: '○ Offline',
     statusChecking: '...',
@@ -99,6 +100,7 @@ const i18n = {
     catAutomation: 'اتوماسیون',
     catStorage: 'ذخیره‌سازی و داده',
     catMonitoring: 'مانیتورینگ',
+    catMarketing: 'مارکتینگ',
     statusOnline: '● آنلاین',
     statusOffline: '○ آفلاین',
     statusChecking: '...',
@@ -270,6 +272,7 @@ const categoryConfig = {
   automation: {icon: '⚡', key: 'catAutomation'},
   storage: {icon: '💾', key: 'catStorage'},
   monitoring: {icon: '📡', key: 'catMonitoring'},
+  marketing: {icon: '📣', key: 'catMarketing'},
 };
 
 /* ============================================
