@@ -37,6 +37,7 @@ const i18n = {
     partialOnline: (a, b) => `${a} of ${b} active`,
     allOffline: 'Services unavailable',
     catAi: 'AI & Machine Learning',
+    catAgents: 'Agents & Tooling',
     catAutomation: 'Automation',
     catStorage: 'Storage & Data',
     catMonitoring: 'Monitoring',
@@ -98,6 +99,7 @@ const i18n = {
     partialOnline: (a, b) => `${a} از ${b} فعال`,
     allOffline: 'سرویس‌ها در دسترس نیستند',
     catAi: 'هوش مصنوعی و یادگیری ماشین',
+    catAgents: 'عامل‌ها و ابزارها',
     catAutomation: 'اتوماسیون',
     catStorage: 'ذخیره‌سازی و داده',
     catMonitoring: 'مانیتورینگ',
@@ -200,7 +202,7 @@ const services = [
   {
     name: '9Router',
     icon: '🧭',
-    category: 'ai',
+    category: 'agents',
     desc: {en: 'Quota/cost router for coding agents (Claude Code, Cursor, Codex, Cline)', fa: 'مسیریاب quota/cost برای ابزارهای coding agent (Claude Code، Cursor، Codex، Cline)'},
     localPort: 20128,
     subdomain: '9router',
@@ -220,7 +222,7 @@ const services = [
   {
     name: 'Hermes Agent',
     icon: '☤',
-    category: 'ai',
+    category: 'agents',
     desc: {en: 'Agent dashboard, memory, and messaging gateway', fa: 'داشبورد عامل، حافظه و درگاه پیام‌رسانی'},
     localPort: 9119,
     subdomain: 'hermes',
@@ -230,7 +232,7 @@ const services = [
   {
     name: 'OpenClaw',
     icon: '🦞',
-    category: 'ai',
+    category: 'agents',
     desc: {en: 'Assistant gateway and control UI', fa: 'درگاه دستیار و رابط کنترل'},
     localPort: 18789,
     subdomain: 'openclaw',
@@ -341,6 +343,7 @@ const services = [
 
 const categoryConfig = {
   ai: {icon: '🧠', key: 'catAi'},
+  agents: {icon: '🤝', key: 'catAgents'},
   automation: {icon: '⚡', key: 'catAutomation'},
   storage: {icon: '💾', key: 'catStorage'},
   monitoring: {icon: '📡', key: 'catMonitoring'},
