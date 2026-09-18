@@ -210,6 +210,16 @@ const services = [
     healthPath: '/',
   },
   {
+    name: 'Dify',
+    icon: '🧱',
+    category: 'ai',
+    desc: {en: 'Build AI applications and agents', fa: 'ساخت اپلیکیشن‌ها و عامل‌های هوش مصنوعی'},
+    localPort: 8080,
+    subdomain: 'dify',
+    urlPath: '/',
+    healthPath: '/',
+  },
+  {
     name: 'Langfuse',
     icon: '🧪',
     category: 'monitoring',
