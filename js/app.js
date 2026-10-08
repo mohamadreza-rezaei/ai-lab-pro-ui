@@ -146,7 +146,7 @@ const services = [
     desc: {en: 'LLM proxy with debug tools', fa: 'پروکسی LLM با ابزارهای دیباگ'},
     localPort: 4000,
     subdomain: 'litellm',
-    urlPath: '/',
+    urlPath: '/ui',
     healthPath: '/ui',
   },
   {
