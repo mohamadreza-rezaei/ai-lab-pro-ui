@@ -386,10 +386,90 @@ body.lang-fa {
   color: var(--accent-cyan);
 }
 
+/* ========== Category Tabs ========== */
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: visible;
+  padding: 0.5rem 0.25rem 1rem;
+  margin: 0 auto 0.75rem;
+  max-width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 72%,
+    transparent 100%
+  );
+}
+
+.category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 1 auto;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.category-tab:hover {
+  border-color: var(--accent-cyan);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.category-tab.active {
+  color: var(--text);
+  border-color: rgba(0, 229, 255, 0.45);
+  background: rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.12);
+}
+
+.category-tab.hidden {
+  display: none;
+}
+
+.category-tab-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.category-tab-count {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.category-tab.active .category-tab-count {
+  border-color: rgba(0, 229, 255, 0.3);
+  color: var(--accent-cyan);
+}
+
 /* ========== Categories ========== */
 .category {
   margin-bottom: 2.5rem;
   animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s backwards;
+  scroll-margin-top: 72px;
 }
 
 .category-header {
@@ -1147,6 +1227,38 @@ body.lang-fa {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   transition: all 0.2s;
   box-sizing: border-box;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field .setting-input {
+  padding-inline-end: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  inset-inline-end: 8px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.password-toggle:hover,
+.password-toggle[aria-pressed='true'] {
+  color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.08);
 }
 
 .setting-input:focus {

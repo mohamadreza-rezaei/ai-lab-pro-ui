@@ -8,20 +8,29 @@ module.exports = merge(common, {
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
+      inject: false,
+    }),
+    new HtmlWebpackPlugin({
+      template: './index.html',
+      filename: 'main.html',
+      inject: false,
     }),
     new CopyPlugin({
       patterns: [
         { from: 'img', to: 'img' },
         { from: 'css', to: 'css' },
         { from: 'js/vendor', to: 'js/vendor' },
+        { from: 'icons', to: 'icons' },
         { from: 'icon.svg', to: 'icon.svg' },
         { from: 'favicon.ico', to: 'favicon.ico' },
         { from: 'robots.txt', to: 'robots.txt' },
         { from: 'icon.png', to: 'icon.png' },
+        { from: 'apple-touch-icon.png', to: 'apple-touch-icon.png' },
         { from: '404.html', to: '404.html' },
         { from: '500.html', to: '500.html' },
         { from: '503.html', to: '503.html' },
         { from: 'site.webmanifest', to: 'site.webmanifest' },
+        { from: 'sw.js', to: 'sw.js' },
       ],
     }),
   ],

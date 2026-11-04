@@ -43,6 +43,7 @@ const i18n = {
     catMonitoring: 'Monitoring',
     catMarketing: 'Marketing',
     catSecurity: 'Security & Identity',
+    catTools: 'Tools & CMS',
     statusOnline: '● Online',
     statusOffline: '○ Offline',
     statusChecking: '...',
@@ -58,6 +59,12 @@ const i18n = {
     environment: 'Environment',
     baseDomain: 'Base Domain',
     baseDomainHelp: 'Used for subdomain access in server mode (e.g. chat.lab.example.com)',
+    litellmApiKey: 'LiteLLM API Key',
+    litellmApiKeyHelp: 'Virtual key used to list Active Models (stored only in this browser)',
+    litellmApiKeyPlaceholder: 'sk-…',
+    showApiKey: 'Show API key',
+    hideApiKey: 'Hide API key',
+    modelsNeedKey: 'Add a LiteLLM API key in Settings to show models',
     cancel: 'Cancel',
     save: 'Save',
   },
@@ -105,6 +112,7 @@ const i18n = {
     catMonitoring: 'مانیتورینگ',
     catMarketing: 'مارکتینگ',
     catSecurity: 'امنیت و هویت',
+    catTools: 'ابزارها و CMS',
     statusOnline: '● آنلاین',
     statusOffline: '○ آفلاین',
     statusChecking: '...',
@@ -120,6 +128,12 @@ const i18n = {
     environment: 'محیط',
     baseDomain: 'دامنه پایه',
     baseDomainHelp: 'برای دسترسی ساب‌دامین در حالت سرور (مثلاً chat.lab.example.com)',
+    litellmApiKey: 'کلید API لایت‌ال‌ال‌ام',
+    litellmApiKeyHelp: 'کلید مجازی برای نمایش مدل‌های فعال (فقط در همین مرورگر ذخیره می‌شود)',
+    litellmApiKeyPlaceholder: 'sk-…',
+    showApiKey: 'نمایش کلید',
+    hideApiKey: 'مخفی کردن کلید',
+    modelsNeedKey: 'برای نمایش مدل‌ها، کلید LiteLLM را در تنظیمات وارد کنید',
     cancel: 'انصراف',
     save: 'ذخیره',
   },
@@ -449,6 +463,7 @@ const categoryConfig = {
   monitoring: {icon: '📡', key: 'catMonitoring'},
   marketing: {icon: '📣', key: 'catMarketing'},
   security: {icon: '🔐', key: 'catSecurity'},
+  tools: {icon: '🧰', key: 'catTools'},
 };
 
 /* ============================================
@@ -462,6 +477,7 @@ const state = {
   theme: localStorage.getItem('theme') || 'dark',
   env: localStorage.getItem('env') || (_isLocalhost ? 'local' : 'server'),
   baseDomain: localStorage.getItem('baseDomain') || 'lab.example.com',
+  litellmApiKey: localStorage.getItem('litellmApiKey') || '',
   startTime: Date.now(),
 };
 
@@ -591,10 +607,21 @@ Settings Management
 function openSettings() {
   const modal = document.getElementById('settings-modal');
   const baseDomainInput = document.getElementById('base-domain');
+  const apiKeyInput = document.getElementById('litellm-api-key');
   document.getElementById('env-local').checked = state.env === 'local';
   document.getElementById('env-server').checked = state.env === 'server';
   baseDomainInput.value = state.baseDomain;
   baseDomainInput.disabled = state.env === 'local';
+  if (apiKeyInput) {
+    apiKeyInput.value = state.litellmApiKey;
+    apiKeyInput.type = 'password';
+  }
+  const toggle = document.getElementById('toggle-api-key');
+  if (toggle) {
+    toggle.setAttribute('aria-pressed', 'false');
+    toggle.setAttribute('aria-label', t().showApiKey);
+    toggle.title = t().showApiKey;
+  }
   modal.classList.add('show');
 }
 
@@ -611,6 +638,7 @@ function closeSettingsDirect() {
 function saveSettings() {
   const newEnv = document.querySelector('input[name="env"]:checked').value;
   const newDomain = document.getElementById('base-domain').value.trim();
+  const newApiKey = (document.getElementById('litellm-api-key')?.value || '').trim();
   const tr = t();
 
   if (newEnv === 'server' && !newDomain) {
@@ -618,19 +646,21 @@ function saveSettings() {
     return;
   }
 
-  // if (newDomain && !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(newDomain)) {
-  //   showToast(tr.toastInvalidDomain);
-  //   return;
-  // }
-
   const envChanged = newEnv !== state.env;
   const domainChanged = newDomain && newDomain !== state.baseDomain;
+  const keyChanged = newApiKey !== state.litellmApiKey;
 
   state.env = newEnv;
   if (newDomain) state.baseDomain = newDomain;
+  state.litellmApiKey = newApiKey;
 
   localStorage.setItem('env', state.env);
   localStorage.setItem('baseDomain', state.baseDomain);
+  if (newApiKey) {
+    localStorage.setItem('litellmApiKey', newApiKey);
+  } else {
+    localStorage.removeItem('litellmApiKey');
+  }
 
   updateEnvBadge();
   closeSettingsDirect();
@@ -639,6 +669,8 @@ function saveSettings() {
   if (envChanged || domainChanged) {
     renderServices();
     refreshStatus();
+  } else if (keyChanged) {
+    loadModels();
   }
 }
 
@@ -648,6 +680,86 @@ function setupSettingsListeners() {
       document.getElementById('base-domain').disabled = e.target.value === 'local';
     });
   });
+
+  const toggle = document.getElementById('toggle-api-key');
+  const apiKeyInput = document.getElementById('litellm-api-key');
+  if (toggle && apiKeyInput) {
+    toggle.addEventListener('click', () => {
+      const showing = apiKeyInput.type === 'text';
+      apiKeyInput.type = showing ? 'password' : 'text';
+      toggle.setAttribute('aria-pressed', showing ? 'false' : 'true');
+      const label = showing ? t().showApiKey : t().hideApiKey;
+      toggle.setAttribute('aria-label', label);
+      toggle.title = label;
+      toggle.innerHTML = showing
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>`
+        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.8 21.8 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.9 21.9 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>`;
+    });
+  }
+}
+
+/* ============================================
+Category Tabs
+============================================ */
+function renderCategoryTabs() {
+  const tabs = document.getElementById('category-tabs');
+  if (!tabs) return;
+  const tr = t();
+  const parts = [];
+
+  Object.keys(categoryConfig).forEach((catKey) => {
+    const count = services.filter((s) => s.category === catKey).length;
+    if (count === 0) return;
+    const cat = categoryConfig[catKey];
+    parts.push(`
+      <button type="button" class="category-tab" data-tab="${catKey}" aria-controls="category-${catKey}">
+        <span class="category-tab-icon">${cat.icon}</span>
+        <span class="category-tab-label">${tr[cat.key]}</span>
+        <span class="category-tab-count">${count}</span>
+      </button>`);
+  });
+
+  tabs.innerHTML = parts.join('');
+}
+
+function setupCategoryTabs() {
+  const tabs = document.getElementById('category-tabs');
+  if (!tabs || tabs.dataset.bound) return;
+  tabs.dataset.bound = '1';
+
+  tabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.category-tab');
+    if (!btn) return;
+    const catKey = btn.dataset.tab;
+    const section = document.getElementById(`category-${catKey}`);
+    if (!section || section.classList.contains('hidden')) return;
+
+    document.querySelectorAll('.category-tab').forEach((el) => el.classList.remove('active'));
+    btn.classList.add('active');
+
+    const offset = 72;
+    const top = section.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({top, behavior: 'smooth'});
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((en) => en.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      const catKey = visible.target.dataset.category;
+      document.querySelectorAll('.category-tab').forEach((el) => {
+        el.classList.toggle('active', el.dataset.tab === catKey);
+      });
+    },
+    {rootMargin: '-20% 0px -55% 0px', threshold: [0.15, 0.4, 0.7]},
+  );
+
+  const observeCategories = () => {
+    document.querySelectorAll('.category').forEach((section) => observer.observe(section));
+  };
+  setupCategoryTabs._observe = observeCategories;
 }
 
 /* ============================================
@@ -660,13 +772,15 @@ function renderServices() {
   let html = '';
   let cardIndex = 0;
 
+  renderCategoryTabs();
+
   Object.keys(categoryConfig).forEach((catKey) => {
     const catServices = services.filter((s) => s.category === catKey);
     if (catServices.length === 0) return;
     const cat = categoryConfig[catKey];
 
     html += `
-            <section class="category" data-category="${catKey}">
+            <section class="category" id="category-${catKey}" data-category="${catKey}">
               <div class="category-header">
                 <span class="category-icon">${cat.icon}</span>
                 <h2 class="category-title">${tr[cat.key]}</h2>
@@ -685,6 +799,8 @@ function renderServices() {
                  data-name="${svc.name.toLowerCase()}"
                  data-desc="${(svc.desc.en + ' ' + svc.desc.fa).toLowerCase()}"
                  data-tech="${svc.localPort}"
+                 data-subdomain="${(svc.subdomain || '').toLowerCase()}"
+                 data-category="${catKey}"
                  data-service-name="${svc.name}"
                  style="animation-delay: ${delay}ms">
                 <div class="card-top">
@@ -713,6 +829,8 @@ function renderServices() {
 
   // Check statuses for newly rendered cards
   document.querySelectorAll('.status-badge[data-health]').forEach(checkStatus);
+
+  setupCategoryTabs._observe?.();
 }
 
 /* ============================================
@@ -781,35 +899,78 @@ async function refreshStatus() {
 /* ============================================
 Models Loader
 ============================================ */
+function getModelsEndpoints() {
+  const base = getApiBaseUrl();
+  return [...new Set([`${base}/v1/models`, `${base}/api/models`, '/api/models'])];
+}
+
+async function fetchModelsFrom(url, apiKey) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store',
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data)) return data;
+    return [];
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
+  }
+}
+
 async function loadModels() {
   const box = document.getElementById('models-box');
   const countEl = document.getElementById('models-count');
   const tr = t();
-  try {
-    // const url = getApiBaseUrl() + '/api/models';
-    const res = await fetch('/api/models');
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
-    const models = data.data || [];
-    countEl.textContent = models.length;
+  const apiKey = (state.litellmApiKey || '').trim();
 
-    if (models.length === 0) {
-      box.innerHTML = `<span class="models-empty">${tr.noResults.replace('found!', 'available')}</span>`;
-      return;
-    }
-    box.innerHTML = models
-      .map((m) => {
-        const id = m.id || '';
-        const isLocal = ['qwen', 'llama', 'deepseek', 'openhermes', 'mistral', 'gemma'].some(
-          (x) => id.toLowerCase().includes(x),
-        );
-        return `<span class="model-tag ${isLocal ? 'local' : 'cloud'}">${id}</span>`;
-      })
-      .join('');
-  } catch (e) {
-    countEl.textContent = '!';
-    box.innerHTML = `<span class="models-empty" style="color: var(--accent-red)">${tr.statusError}</span>`;
+  if (!apiKey) {
+    countEl.textContent = '0';
+    box.innerHTML = `<span class="models-empty">${tr.modelsNeedKey}</span>`;
+    return;
   }
+
+  box.innerHTML = `<span class="models-empty">${tr.loading}</span>`;
+
+  for (const url of getModelsEndpoints()) {
+    try {
+      const models = await fetchModelsFrom(url, apiKey);
+      countEl.textContent = models.length;
+
+      if (models.length === 0) {
+        box.innerHTML = `<span class="models-empty">${tr.noResults.replace('found!', 'available')}</span>`;
+        return;
+      }
+      box.innerHTML = models
+        .map((m) => {
+          const id = typeof m === 'string' ? m : m.id || m.model || '';
+          if (!id) return '';
+          const isLocal = ['qwen', 'llama', 'deepseek', 'openhermes', 'mistral', 'gemma'].some(
+            (x) => id.toLowerCase().includes(x),
+          );
+          return `<span class="model-tag ${isLocal ? 'local' : 'cloud'}">${id}</span>`;
+        })
+        .join('');
+      return;
+    } catch (_) {
+      /* try next endpoint */
+    }
+  }
+
+  countEl.textContent = '!';
+  box.innerHTML = `<span class="models-empty" style="color: var(--accent-red)">${tr.statusError}</span>`;
 }
 
 /* ============================================
@@ -891,7 +1052,9 @@ function setupSearch() {
         !query ||
         card.dataset.name.includes(query) ||
         card.dataset.desc.includes(query) ||
-        card.dataset.tech.toLowerCase().includes(query);
+        card.dataset.tech.toLowerCase().includes(query) ||
+        (card.dataset.subdomain || '').includes(query) ||
+        (card.dataset.category || '').includes(query);
       card.classList.toggle('hidden', !match);
       if (match) totalVisible++;
     });
@@ -899,6 +1062,11 @@ function setupSearch() {
     categorySections.forEach((section) => {
       const visibleCards = section.querySelectorAll('.service-card:not(.hidden)').length;
       section.classList.toggle('hidden', visibleCards === 0);
+    });
+
+    document.querySelectorAll('.category-tab').forEach((tab) => {
+      const section = document.getElementById(`category-${tab.dataset.tab}`);
+      tab.classList.toggle('hidden', !section || section.classList.contains('hidden'));
     });
 
     noResults.classList.toggle('show', totalVisible === 0 && query !== '');
@@ -1043,6 +1211,7 @@ function init() {
   setupRipple();
   setupKeyboard();
   setupSettingsListeners();
+  setupCategoryTabs();
   updateMeta();
   setInterval(updateMeta, 1000);
 
@@ -1056,6 +1225,8 @@ function init() {
 
   setInterval(refreshStatus, 30000);
 
+  registerServiceWorker();
+
   // Console greeting
   console.log(
     '%c🚀 Service Hub Loaded',
@@ -1065,6 +1236,19 @@ function init() {
     '%cEnvironment: ' + state.env + ' (' + state.baseDomain + ')',
     'color: #b026ff; font-size: 12px;',
   );
+}
+
+/* ============================================
+PWA
+============================================ */
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  const swUrl = new URL('sw.js', window.location.href);
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(swUrl.href).catch(() => {
+      /* ignore path / offline failures */
+    });
+  });
 }
 
 Object.assign(window, {
