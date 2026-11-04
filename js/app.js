@@ -613,6 +613,13 @@ const featuredCarousel = {
   index: 0,
   timer: null,
   paused: false,
+  dragging: false,
+  dragMoved: false,
+  suppressClick: false,
+  startX: 0,
+  lastX: 0,
+  baseTranslate: 0,
+  pointerId: null,
 };
 
 const t = () => i18n[state.lang];
@@ -946,6 +953,20 @@ function getFeaturedMaxIndex(total, visible) {
   return Math.max(0, total - visible);
 }
 
+function getFeaturedDir() {
+  return document.documentElement.dir === 'rtl' ? 1 : -1;
+}
+
+function getFeaturedStep(track, slides) {
+  if (!track || !slides?.length) return 0;
+  const gap = parseFloat(getComputedStyle(track).gap) || 0;
+  return slides[0].getBoundingClientRect().width + gap;
+}
+
+function getFeaturedTranslate(index, step) {
+  return getFeaturedDir() * index * step;
+}
+
 function stopFeaturedCarousel() {
   if (featuredCarousel.timer) {
     clearInterval(featuredCarousel.timer);
@@ -959,7 +980,7 @@ function startFeaturedCarousel() {
   const visible = getFeaturedVisibleCount(slides.length);
   if (getFeaturedMaxIndex(slides.length, visible) <= 0) return;
   featuredCarousel.timer = setInterval(() => {
-    if (featuredCarousel.paused) return;
+    if (featuredCarousel.paused || featuredCarousel.dragging) return;
     showFeaturedSlide(featuredCarousel.index + 1);
   }, FEATURED_ROTATE_MS);
 }
@@ -977,6 +998,7 @@ function showFeaturedSlide(nextIndex) {
   const maxIndex = getFeaturedMaxIndex(total, visible);
 
   track.style.setProperty('--featured-visible', String(visible));
+  track.style.transition = '';
 
   let idx = nextIndex;
   if (idx > maxIndex) idx = 0;
@@ -984,10 +1006,8 @@ function showFeaturedSlide(nextIndex) {
   featuredCarousel.index = idx;
 
   // Move by one card (+ gap) in px so 3-up layout stays aligned
-  const dir = document.documentElement.dir === 'rtl' ? 1 : -1;
-  const gap = parseFloat(getComputedStyle(track).gap) || 0;
-  const step = slides[0].getBoundingClientRect().width + gap;
-  track.style.transform = `translateX(${dir * featuredCarousel.index * step}px)`;
+  const step = getFeaturedStep(track, slides);
+  track.style.transform = `translateX(${getFeaturedTranslate(featuredCarousel.index, step)}px)`;
 
   slides.forEach((slide, i) => {
     const inView = i >= featuredCarousel.index && i < featuredCarousel.index + visible;
@@ -1033,7 +1053,7 @@ function renderFeatured() {
       const displayUrl = getServiceDisplay(svc);
       const inView = i < visible;
       return `
-        <a href="${fullUrl}" target="_blank" rel="noopener noreferrer"
+        <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" draggable="false"
            class="featured-slide service-card ${inView ? 'active' : ''}"
            data-name="${svc.name.toLowerCase()}"
            data-desc="${(svc.desc.en + ' ' + svc.desc.fa).toLowerCase()}"
@@ -1068,8 +1088,20 @@ function renderFeatured() {
   startFeaturedCarousel();
 }
 
+function wrapFeaturedIndex(index, maxIndex) {
+  if (maxIndex <= 0) return 0;
+  const span = maxIndex + 1;
+  return ((index % span) + span) % span;
+}
+
+function isFeaturedSectionHovered() {
+  const section = document.getElementById('featured-section');
+  return Boolean(section?.matches(':hover'));
+}
+
 function setupFeaturedCarousel() {
   const section = document.getElementById('featured-section');
+  const carousel = document.querySelector('.featured-carousel');
   if (!section || section.dataset.bound) return;
   section.dataset.bound = '1';
 
@@ -1077,13 +1109,13 @@ function setupFeaturedCarousel() {
     featuredCarousel.paused = true;
   });
   section.addEventListener('mouseleave', () => {
-    featuredCarousel.paused = false;
+    if (!featuredCarousel.dragging) featuredCarousel.paused = false;
   });
   section.addEventListener('focusin', () => {
     featuredCarousel.paused = true;
   });
   section.addEventListener('focusout', () => {
-    featuredCarousel.paused = false;
+    if (!featuredCarousel.dragging) featuredCarousel.paused = false;
   });
 
   document.getElementById('featured-prev')?.addEventListener('click', () => {
@@ -1100,6 +1132,148 @@ function setupFeaturedCarousel() {
     showFeaturedSlide(Number(dot.dataset.index));
     startFeaturedCarousel();
   });
+
+  if (carousel) {
+    const onPointerMove = (e) => {
+      if (!featuredCarousel.dragging) return;
+      if (e.pointerId !== featuredCarousel.pointerId) return;
+      const track = document.getElementById('featured-track');
+      if (!track) return;
+
+      const dx = e.clientX - featuredCarousel.startX;
+      featuredCarousel.lastX = e.clientX;
+      if (!featuredCarousel.dragMoved && Math.abs(dx) < 6) return;
+
+      featuredCarousel.dragMoved = true;
+      carousel.classList.add('is-dragging');
+      e.preventDefault();
+      track.style.transition = 'none';
+      track.style.transform = `translateX(${featuredCarousel.baseTranslate + dx}px)`;
+    };
+
+    const endDrag = (e) => {
+      if (!featuredCarousel.dragging) return;
+      if (
+        featuredCarousel.pointerId != null &&
+        e.pointerId !== featuredCarousel.pointerId
+      ) {
+        return;
+      }
+
+      const track = document.getElementById('featured-track');
+      const slides = Array.from(document.querySelectorAll('.featured-slide'));
+      const step = getFeaturedStep(track, slides);
+      const maxIndex = getFeaturedMaxIndex(
+        slides.length,
+        getFeaturedVisibleCount(slides.length),
+      );
+      const clientX = e.clientX ?? featuredCarousel.lastX;
+      const dx = clientX - featuredCarousel.startX;
+      const moved = featuredCarousel.dragMoved;
+
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', endDrag);
+      window.removeEventListener('pointercancel', endDrag);
+
+      try {
+        carousel.releasePointerCapture?.(featuredCarousel.pointerId);
+      } catch (_) {
+        /* already released */
+      }
+
+      carousel.classList.remove('is-dragging');
+      featuredCarousel.dragging = false;
+      featuredCarousel.pointerId = null;
+      featuredCarousel.paused = isFeaturedSectionHovered();
+
+      if (!moved || !step || maxIndex <= 0) {
+        showFeaturedSlide(featuredCarousel.index);
+        startFeaturedCarousel();
+        return;
+      }
+
+      // Snap to nearest card; wrap so the sequence never dead-ends
+      const dir = getFeaturedDir();
+      const raw = (featuredCarousel.baseTranslate + dx) / (dir * step);
+      let next = Math.round(raw);
+      // Decisive swipe: always move at least one step in swipe direction
+      if (Math.abs(dx) >= Math.max(36, step * 0.18)) {
+        const dirStep = Math.sign(dx / (dir * step)) || (dx * dir < 0 ? 1 : -1);
+        if (next === featuredCarousel.index) next = featuredCarousel.index + dirStep;
+      }
+      next = wrapFeaturedIndex(next, maxIndex);
+      showFeaturedSlide(next);
+      featuredCarousel.suppressClick = true;
+      window.setTimeout(() => {
+        featuredCarousel.suppressClick = false;
+        featuredCarousel.dragMoved = false;
+      }, 50);
+      startFeaturedCarousel();
+    };
+
+    carousel.addEventListener('dragstart', (e) => {
+      e.preventDefault();
+    });
+
+    carousel.addEventListener('pointerdown', (e) => {
+      if (e.button != null && e.button !== 0) return;
+      if (e.target.closest('.featured-controls, .featured-dot, .icon-btn')) return;
+      const track = document.getElementById('featured-track');
+      const slides = Array.from(document.querySelectorAll('.featured-slide'));
+      const maxIndex = getFeaturedMaxIndex(
+        slides.length,
+        getFeaturedVisibleCount(slides.length),
+      );
+      if (!track || maxIndex <= 0) return;
+
+      // Stop native <a> drag / text selection from stealing the gesture
+      if (e.pointerType === 'mouse') e.preventDefault();
+
+      const step = getFeaturedStep(track, slides);
+      featuredCarousel.dragging = true;
+      featuredCarousel.dragMoved = false;
+      featuredCarousel.suppressClick = false;
+      featuredCarousel.startX = e.clientX;
+      featuredCarousel.lastX = e.clientX;
+      featuredCarousel.baseTranslate = getFeaturedTranslate(featuredCarousel.index, step);
+      featuredCarousel.pointerId = e.pointerId;
+      featuredCarousel.paused = true;
+      track.style.transition = 'none';
+
+      try {
+        carousel.setPointerCapture(e.pointerId);
+      } catch (_) {
+        /* capture optional */
+      }
+
+      window.addEventListener('pointermove', onPointerMove, {passive: false});
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
+    });
+
+    carousel.addEventListener('lostpointercapture', () => {
+      if (!featuredCarousel.dragging) return;
+      endDrag({
+        pointerId: featuredCarousel.pointerId,
+        clientX: featuredCarousel.lastX,
+      });
+    });
+
+    // After a drag, block the synthetic click so cards don't open mid-swipe
+    carousel.addEventListener(
+      'click',
+      (e) => {
+        if (!featuredCarousel.suppressClick && !featuredCarousel.dragMoved) return;
+        if (featuredCarousel.suppressClick || featuredCarousel.dragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+          featuredCarousel.suppressClick = false;
+          featuredCarousel.dragMoved = false;
+        }
+      },
+      true,
+    );
+  }
 
   window.addEventListener('resize', () => {
     if (!document.querySelector('.featured-slide')) return;

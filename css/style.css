@@ -314,6 +314,7 @@ body.lang-fa {
   max-width: 500px;
   margin: 0 auto 2.5rem;
   position: relative;
+  z-index: 5;
   animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.15s backwards;
 }
 
@@ -413,7 +414,29 @@ body.lang-fa {
 
 .featured-carousel {
   position: relative;
+  /* Room for hover glow inside overflow:hidden (no scale — scale was clipping edge cards) */
+  --featured-pad: 0.85rem;
+  padding: var(--featured-pad);
+  margin: calc(var(--featured-pad) * -1);
   overflow: hidden;
+  isolation: isolate;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.featured-carousel.is-static {
+  cursor: default;
+}
+
+.featured-carousel.is-dragging,
+.featured-carousel.is-dragging * {
+  cursor: grabbing !important;
+}
+
+.featured-carousel.is-dragging .featured-slide {
+  pointer-events: none;
 }
 
 .featured-track {
@@ -440,6 +463,20 @@ body.lang-fa {
   );
   box-sizing: border-box;
   margin: 0;
+  -webkit-user-drag: none;
+  user-drag: none;
+  z-index: 0;
+}
+
+/* Carousel clips overflow — keep size fixed; highlight with border/glow only */
+.featured-slide.service-card:hover,
+.featured-slide.service-card:active {
+  transform: none !important;
+  z-index: 1;
+  box-shadow:
+    0 0 0 1px rgba(0, 229, 255, 0.45),
+    0 8px 28px rgba(0, 0, 0, 0.35),
+    0 0 18px rgba(0, 229, 255, 0.16);
 }
 
 .featured-slide .service-icon {
