@@ -156,7 +156,7 @@ const i18n = {
 };
 
 /* Featured service names (order = carousel order). Add more anytime. */
-const FEATURED_SERVICE_NAMES = ['Open WebUI', 'LiteLLM', 'Grafana', 'Portainer'];
+const FEATURED_SERVICE_NAMES = ['Open WebUI', 'LiteLLM', 'Grafana', 'Mattermost', 'Portainer'];
 const FEATURED_VISIBLE = 3;
 const FEATURED_ROTATE_MS = 5000;
 
@@ -447,6 +447,19 @@ const services = [
     subdomain: 'grafana',
     urlPath: '/',
     healthPath: '/api/health',
+  },
+  {
+    name: 'Mattermost',
+    icon: '🔔',
+    category: 'observability',
+    desc: {
+      en: 'Team chat and Grafana alert notifications',
+      fa: 'چت تیمی و اعلان‌های هشدار Grafana',
+    },
+    localPort: 8065,
+    subdomain: 'mattermost',
+    urlPath: '/',
+    healthPath: '/api/v4/system/ping',
   },
   {
     name: 'OpenPanel',
