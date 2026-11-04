@@ -1,11 +1,12 @@
 /* AI Lab Pro — service worker (cache shell, network for APIs) */
-const CACHE_VERSION = 'ailab-ui-v1.1.1';
+const CACHE_VERSION = 'ailab-ui-v1.2.0';
 const SHELL = [
   './',
   './index.html',
   './main.html',
   './css/style.css',
   './js/app.js',
+  './img/logo.png',
   './icon.svg',
   './favicon.ico',
   './icon.png',

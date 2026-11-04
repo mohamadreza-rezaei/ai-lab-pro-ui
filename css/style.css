@@ -196,20 +196,31 @@ body.lang-fa {
 }
 
 .logo {
-  font-size: 4rem;
   margin-bottom: 0.75rem;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   animation: float 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.4));
+  filter: drop-shadow(0 0 22px rgba(0, 229, 255, 0.35));
+}
+
+.logo img {
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: contain;
+  display: block;
+  border-radius: 1.25rem;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 @keyframes float {
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(-15px) rotate(5deg);
+    transform: translateY(-10px);
   }
 }
 
@@ -1137,8 +1148,9 @@ body.lang-fa {
     padding: 4rem 1rem 1rem;
   }
 
-  .logo {
-    font-size: 3rem;
+  .logo img {
+    width: 5.5rem;
+    height: 5.5rem;
   }
 
   .services-grid {
