@@ -60,11 +60,14 @@ const i18n = {
     baseDomain: 'Base Domain',
     baseDomainHelp: 'Used for subdomain access in server mode (e.g. chat.lab.example.com)',
     litellmApiKey: 'LiteLLM API Key',
-    litellmApiKeyHelp: 'Virtual key used to list Active Models (stored only in this browser)',
+    litellmApiKeyHelp: 'Virtual key for this environment (local and server keys are stored separately)',
     litellmApiKeyPlaceholder: 'sk-…',
     showApiKey: 'Show API key',
     hideApiKey: 'Hide API key',
     modelsNeedKey: 'Add a LiteLLM API key in Settings to show models',
+    featuredTitle: 'Featured',
+    featuredPrev: 'Previous featured',
+    featuredNext: 'Next featured',
     cancel: 'Cancel',
     save: 'Save',
   },
@@ -129,15 +132,23 @@ const i18n = {
     baseDomain: 'دامنه پایه',
     baseDomainHelp: 'برای دسترسی ساب‌دامین در حالت سرور (مثلاً chat.lab.example.com)',
     litellmApiKey: 'کلید API لایت‌ال‌ال‌ام',
-    litellmApiKeyHelp: 'کلید مجازی برای نمایش مدل‌های فعال (فقط در همین مرورگر ذخیره می‌شود)',
+    litellmApiKeyHelp: 'کلید مجازی برای همین محیط (کلیدهای محلی و سرور جداگانه ذخیره می‌شوند)',
     litellmApiKeyPlaceholder: 'sk-…',
     showApiKey: 'نمایش کلید',
     hideApiKey: 'مخفی کردن کلید',
     modelsNeedKey: 'برای نمایش مدل‌ها، کلید LiteLLM را در تنظیمات وارد کنید',
+    featuredTitle: 'ویژه',
+    featuredPrev: 'قبلی',
+    featuredNext: 'بعدی',
     cancel: 'انصراف',
     save: 'ذخیره',
   },
 };
+
+/* Featured service names (order = carousel order). Add more anytime. */
+const FEATURED_SERVICE_NAMES = ['Open WebUI', 'LiteLLM', 'Grafana', 'Portainer'];
+const FEATURED_VISIBLE = 3;
+const FEATURED_ROTATE_MS = 5000;
 
 /* ============================================
 Service Data
@@ -472,13 +483,53 @@ State
 // Auto-detect environment based on hostname
 const _isLocalhost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
 
+function apiKeyStorageKey(env) {
+  return env === 'server' ? 'litellmApiKeyServer' : 'litellmApiKeyLocal';
+}
+
+function getLitellmApiKey(env) {
+  const resolved =
+    env ||
+    (typeof state !== 'undefined' && state.env) ||
+    localStorage.getItem('env') ||
+    (_isLocalhost ? 'local' : 'server');
+  return localStorage.getItem(apiKeyStorageKey(resolved)) || '';
+}
+
+function setLitellmApiKey(key, env) {
+  const resolved = env || state.env;
+  const storageKey = apiKeyStorageKey(resolved);
+  if (key) localStorage.setItem(storageKey, key);
+  else localStorage.removeItem(storageKey);
+}
+
+function migrateLegacyApiKey() {
+  const legacy = localStorage.getItem('litellmApiKey');
+  if (!legacy) return;
+  const env = localStorage.getItem('env') || (_isLocalhost ? 'local' : 'server');
+  if (!getLitellmApiKey(env)) setLitellmApiKey(legacy, env);
+  localStorage.removeItem('litellmApiKey');
+}
+
+migrateLegacyApiKey();
+
 const state = {
   lang: localStorage.getItem('lang') || 'en',
   theme: localStorage.getItem('theme') || 'dark',
   env: localStorage.getItem('env') || (_isLocalhost ? 'local' : 'server'),
   baseDomain: localStorage.getItem('baseDomain') || 'lab.example.com',
-  litellmApiKey: localStorage.getItem('litellmApiKey') || '',
   startTime: Date.now(),
+};
+
+const settingsDraftKeys = {
+  local: getLitellmApiKey('local'),
+  server: getLitellmApiKey('server'),
+};
+
+const featuredCarousel = {
+  index: 0,
+  timer: null,
+  paused: false,
 };
 
 const t = () => i18n[state.lang];
@@ -589,6 +640,17 @@ function applyLanguage() {
   // Update page title
   document.title = tr.title;
 
+  const featuredPrev = document.getElementById('featured-prev');
+  const featuredNext = document.getElementById('featured-next');
+  if (featuredPrev) {
+    featuredPrev.setAttribute('aria-label', tr.featuredPrev);
+    featuredPrev.title = tr.featuredPrev;
+  }
+  if (featuredNext) {
+    featuredNext.setAttribute('aria-label', tr.featuredNext);
+    featuredNext.title = tr.featuredNext;
+  }
+
   localStorage.setItem('lang', state.lang);
 
   updateEnvBadge();
@@ -604,24 +666,38 @@ function toggleLanguage() {
 /* ============================================
 Settings Management
 ============================================ */
-function openSettings() {
-  const modal = document.getElementById('settings-modal');
-  const baseDomainInput = document.getElementById('base-domain');
+function syncApiKeyField(env) {
   const apiKeyInput = document.getElementById('litellm-api-key');
-  document.getElementById('env-local').checked = state.env === 'local';
-  document.getElementById('env-server').checked = state.env === 'server';
-  baseDomainInput.value = state.baseDomain;
-  baseDomainInput.disabled = state.env === 'local';
-  if (apiKeyInput) {
-    apiKeyInput.value = state.litellmApiKey;
-    apiKeyInput.type = 'password';
-  }
+  if (!apiKeyInput) return;
+  apiKeyInput.dataset.envBound = env;
+  apiKeyInput.value = settingsDraftKeys[env] || '';
+  apiKeyInput.type = 'password';
   const toggle = document.getElementById('toggle-api-key');
   if (toggle) {
     toggle.setAttribute('aria-pressed', 'false');
     toggle.setAttribute('aria-label', t().showApiKey);
     toggle.title = t().showApiKey;
+    toggle.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
   }
+}
+
+function stashApiKeyDraftFromInput() {
+  const apiKeyInput = document.getElementById('litellm-api-key');
+  if (!apiKeyInput) return;
+  const bound = apiKeyInput.dataset.envBound || state.env;
+  settingsDraftKeys[bound] = apiKeyInput.value;
+}
+
+function openSettings() {
+  const modal = document.getElementById('settings-modal');
+  const baseDomainInput = document.getElementById('base-domain');
+  settingsDraftKeys.local = getLitellmApiKey('local');
+  settingsDraftKeys.server = getLitellmApiKey('server');
+  document.getElementById('env-local').checked = state.env === 'local';
+  document.getElementById('env-server').checked = state.env === 'server';
+  baseDomainInput.value = state.baseDomain;
+  baseDomainInput.disabled = state.env === 'local';
+  syncApiKeyField(state.env);
   modal.classList.add('show');
 }
 
@@ -638,7 +714,6 @@ function closeSettingsDirect() {
 function saveSettings() {
   const newEnv = document.querySelector('input[name="env"]:checked').value;
   const newDomain = document.getElementById('base-domain').value.trim();
-  const newApiKey = (document.getElementById('litellm-api-key')?.value || '').trim();
   const tr = t();
 
   if (newEnv === 'server' && !newDomain) {
@@ -646,21 +721,26 @@ function saveSettings() {
     return;
   }
 
+  stashApiKeyDraftFromInput();
+
+  const prevLocal = getLitellmApiKey('local');
+  const prevServer = getLitellmApiKey('server');
+  const nextLocal = (settingsDraftKeys.local || '').trim();
+  const nextServer = (settingsDraftKeys.server || '').trim();
+
   const envChanged = newEnv !== state.env;
   const domainChanged = newDomain && newDomain !== state.baseDomain;
-  const keyChanged = newApiKey !== state.litellmApiKey;
+  const keyChanged = nextLocal !== prevLocal || nextServer !== prevServer;
 
   state.env = newEnv;
   if (newDomain) state.baseDomain = newDomain;
-  state.litellmApiKey = newApiKey;
 
   localStorage.setItem('env', state.env);
   localStorage.setItem('baseDomain', state.baseDomain);
-  if (newApiKey) {
-    localStorage.setItem('litellmApiKey', newApiKey);
-  } else {
-    localStorage.removeItem('litellmApiKey');
-  }
+  setLitellmApiKey(nextLocal, 'local');
+  setLitellmApiKey(nextServer, 'server');
+  settingsDraftKeys.local = nextLocal;
+  settingsDraftKeys.server = nextServer;
 
   updateEnvBadge();
   closeSettingsDirect();
@@ -677,7 +757,9 @@ function saveSettings() {
 function setupSettingsListeners() {
   document.querySelectorAll('input[name="env"]').forEach((radio) => {
     radio.addEventListener('change', (e) => {
+      stashApiKeyDraftFromInput();
       document.getElementById('base-domain').disabled = e.target.value === 'local';
+      syncApiKeyField(e.target.value);
     });
   });
 
@@ -765,6 +847,184 @@ function setupCategoryTabs() {
 /* ============================================
 Render Services
 ============================================ */
+function getFeaturedServices() {
+  return FEATURED_SERVICE_NAMES.map((name) => services.find((s) => s.name === name)).filter(
+    Boolean,
+  );
+}
+
+function getFeaturedVisibleCount(total) {
+  if (window.matchMedia('(max-width: 640px)').matches) return 1;
+  if (window.matchMedia('(max-width: 900px)').matches) return Math.min(2, total);
+  return Math.min(FEATURED_VISIBLE, total);
+}
+
+function getFeaturedMaxIndex(total, visible) {
+  return Math.max(0, total - visible);
+}
+
+function stopFeaturedCarousel() {
+  if (featuredCarousel.timer) {
+    clearInterval(featuredCarousel.timer);
+    featuredCarousel.timer = null;
+  }
+}
+
+function startFeaturedCarousel() {
+  stopFeaturedCarousel();
+  const slides = document.querySelectorAll('.featured-slide');
+  const visible = getFeaturedVisibleCount(slides.length);
+  if (getFeaturedMaxIndex(slides.length, visible) <= 0) return;
+  featuredCarousel.timer = setInterval(() => {
+    if (featuredCarousel.paused) return;
+    showFeaturedSlide(featuredCarousel.index + 1);
+  }, FEATURED_ROTATE_MS);
+}
+
+function showFeaturedSlide(nextIndex) {
+  const track = document.getElementById('featured-track');
+  const carousel = document.querySelector('.featured-carousel');
+  const controls = document.querySelector('.featured-controls');
+  const slides = Array.from(document.querySelectorAll('.featured-slide'));
+  const dots = Array.from(document.querySelectorAll('.featured-dot'));
+  if (!track || !slides.length) return;
+
+  const total = slides.length;
+  const visible = getFeaturedVisibleCount(total);
+  const maxIndex = getFeaturedMaxIndex(total, visible);
+
+  track.style.setProperty('--featured-visible', String(visible));
+
+  let idx = nextIndex;
+  if (idx > maxIndex) idx = 0;
+  if (idx < 0) idx = maxIndex;
+  featuredCarousel.index = idx;
+
+  // Move by one card (+ gap) in px so 3-up layout stays aligned
+  const dir = document.documentElement.dir === 'rtl' ? 1 : -1;
+  const gap = parseFloat(getComputedStyle(track).gap) || 0;
+  const step = slides[0].getBoundingClientRect().width + gap;
+  track.style.transform = `translateX(${dir * featuredCarousel.index * step}px)`;
+
+  slides.forEach((slide, i) => {
+    const inView = i >= featuredCarousel.index && i < featuredCarousel.index + visible;
+    slide.classList.toggle('active', inView);
+    slide.setAttribute('aria-hidden', inView ? 'false' : 'true');
+  });
+  dots.forEach((dot, i) => {
+    const active = i === featuredCarousel.index;
+    dot.classList.toggle('active', active);
+    dot.setAttribute('aria-current', active ? 'true' : 'false');
+  });
+
+  const showControls = maxIndex > 0;
+  if (controls) controls.hidden = !showControls;
+  const dotsWrap = document.getElementById('featured-dots');
+  if (dotsWrap) dotsWrap.hidden = !showControls;
+  if (carousel) carousel.classList.toggle('is-static', !showControls);
+}
+
+function renderFeatured() {
+  const section = document.getElementById('featured-section');
+  const track = document.getElementById('featured-track');
+  const dots = document.getElementById('featured-dots');
+  if (!section || !track || !dots) return;
+
+  const featured = getFeaturedServices();
+  const tr = t();
+
+  if (!featured.length) {
+    section.hidden = true;
+    stopFeaturedCarousel();
+    return;
+  }
+
+  section.hidden = false;
+  const visible = getFeaturedVisibleCount(featured.length);
+  track.style.setProperty('--featured-visible', String(visible));
+  track.style.transform = 'translateX(0)';
+  track.innerHTML = featured
+    .map((svc, i) => {
+      const fullUrl = getServiceUrl(svc);
+      const healthUrl = getServiceHealth(svc);
+      const displayUrl = getServiceDisplay(svc);
+      const inView = i < visible;
+      return `
+        <a href="${fullUrl}" target="_blank" rel="noopener noreferrer"
+           class="featured-slide service-card ${inView ? 'active' : ''}"
+           data-name="${svc.name.toLowerCase()}"
+           data-desc="${(svc.desc.en + ' ' + svc.desc.fa).toLowerCase()}"
+           data-tech="${svc.localPort}"
+           data-subdomain="${(svc.subdomain || '').toLowerCase()}"
+           data-category="${svc.category}"
+           data-service-name="${svc.name}"
+           aria-hidden="${inView ? 'false' : 'true'}">
+          <div class="card-top">
+            <span class="service-icon">${svc.icon}</span>
+            <span class="status-badge checking" data-health="${healthUrl}">${tr.statusChecking}</span>
+          </div>
+          <h3 class="service-name">${svc.name}</h3>
+          <p class="service-desc">${svc.desc[state.lang]}</p>
+          <div class="service-url">${displayUrl}</div>
+          <div class="card-footer">
+            <span class="port-badge">:${svc.localPort}</span>
+            <span class="arrow">${state.lang === 'fa' ? '←' : '→'}</span>
+          </div>
+        </a>`;
+    })
+    .join('');
+
+  const pageCount = getFeaturedMaxIndex(featured.length, visible) + 1;
+  dots.innerHTML = Array.from({length: pageCount}, (_, i) => {
+    return `<button type="button" class="featured-dot ${i === 0 ? 'active' : ''}" data-index="${i}" aria-label="${i + 1}" aria-current="${i === 0 ? 'true' : 'false'}"></button>`;
+  }).join('');
+
+  featuredCarousel.index = 0;
+  showFeaturedSlide(0);
+  track.querySelectorAll('.status-badge[data-health]').forEach(checkStatus);
+  startFeaturedCarousel();
+}
+
+function setupFeaturedCarousel() {
+  const section = document.getElementById('featured-section');
+  if (!section || section.dataset.bound) return;
+  section.dataset.bound = '1';
+
+  section.addEventListener('mouseenter', () => {
+    featuredCarousel.paused = true;
+  });
+  section.addEventListener('mouseleave', () => {
+    featuredCarousel.paused = false;
+  });
+  section.addEventListener('focusin', () => {
+    featuredCarousel.paused = true;
+  });
+  section.addEventListener('focusout', () => {
+    featuredCarousel.paused = false;
+  });
+
+  document.getElementById('featured-prev')?.addEventListener('click', () => {
+    showFeaturedSlide(featuredCarousel.index - 1);
+    startFeaturedCarousel();
+  });
+  document.getElementById('featured-next')?.addEventListener('click', () => {
+    showFeaturedSlide(featuredCarousel.index + 1);
+    startFeaturedCarousel();
+  });
+  document.getElementById('featured-dots')?.addEventListener('click', (e) => {
+    const dot = e.target.closest('.featured-dot');
+    if (!dot) return;
+    showFeaturedSlide(Number(dot.dataset.index));
+    startFeaturedCarousel();
+  });
+
+  window.addEventListener('resize', () => {
+    if (!document.querySelector('.featured-slide')) return;
+    showFeaturedSlide(featuredCarousel.index);
+    startFeaturedCarousel();
+  });
+}
+
 function renderServices() {
   const main = document.getElementById('main-content');
   main.querySelectorAll('.category').forEach((el) => el.remove());
@@ -772,6 +1032,7 @@ function renderServices() {
   let html = '';
   let cardIndex = 0;
 
+  renderFeatured();
   renderCategoryTabs();
 
   Object.keys(categoryConfig).forEach((catKey) => {
@@ -934,7 +1195,7 @@ async function loadModels() {
   const box = document.getElementById('models-box');
   const countEl = document.getElementById('models-count');
   const tr = t();
-  const apiKey = (state.litellmApiKey || '').trim();
+  const apiKey = getLitellmApiKey(state.env).trim();
 
   if (!apiKey) {
     countEl.textContent = '0';
@@ -1212,6 +1473,7 @@ function init() {
   setupKeyboard();
   setupSettingsListeners();
   setupCategoryTabs();
+  setupFeaturedCarousel();
   updateMeta();
   setInterval(updateMeta, 1000);
 

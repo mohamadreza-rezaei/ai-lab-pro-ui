@@ -386,6 +386,99 @@ body.lang-fa {
   color: var(--accent-cyan);
 }
 
+/* ========== Featured Carousel (3 across, horizontal L/R) ========== */
+.featured-section {
+  margin: 0 auto 1.75rem;
+  max-width: 100%;
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;
+}
+
+.featured-section[hidden] {
+  display: none !important;
+}
+
+.featured-title-row {
+  margin-bottom: 0.85rem;
+}
+
+.featured-controls {
+  margin-inline-start: auto;
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.featured-controls[hidden] {
+  display: none !important;
+}
+
+.featured-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-track {
+  --featured-visible: 3;
+  --featured-gap: 1rem;
+  display: flex;
+  flex-direction: row;
+  gap: var(--featured-gap);
+  width: 100%;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.featured-slide {
+  flex: 0 0
+    calc(
+      (100% - (var(--featured-visible) - 1) * var(--featured-gap)) / var(--featured-visible)
+    );
+  width: calc(
+    (100% - (var(--featured-visible) - 1) * var(--featured-gap)) / var(--featured-visible)
+  );
+  max-width: calc(
+    (100% - (var(--featured-visible) - 1) * var(--featured-gap)) / var(--featured-visible)
+  );
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.featured-slide .service-icon {
+  font-size: 2.35rem;
+}
+
+.featured-dots[hidden] {
+  display: none !important;
+}
+
+.featured-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.featured-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.featured-dot:hover {
+  border-color: var(--accent-cyan);
+}
+
+.featured-dot.active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+  transform: scale(1.15);
+}
+
 /* ========== Category Tabs ========== */
 .category-tabs {
   display: flex;
