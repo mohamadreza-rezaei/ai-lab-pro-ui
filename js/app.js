@@ -587,7 +587,7 @@ function applyLanguage() {
   document.getElementById('lang-flag').textContent = state.lang === 'fa' ? '🇬🇧' : '🇮🇷';
 
   // Update page title
-  document.title = `🚀 ${tr.title}`;
+  document.title = tr.title;
 
   localStorage.setItem('lang', state.lang);
 
