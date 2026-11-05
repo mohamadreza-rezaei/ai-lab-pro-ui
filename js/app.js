@@ -293,6 +293,19 @@ const services = [
     urlPath: '/',
     healthPath: '/',
   },
+  {
+    name: 'Moyai',
+    icon: '🗿',
+    category: 'agents',
+    desc: {
+      en: 'PydanticAI agent workspace with durable sessions',
+      fa: 'فضای کار عامل PydanticAI با نشست‌های پایدار',
+    },
+    localPort: 8787,
+    subdomain: 'moyai',
+    urlPath: '/',
+    healthPath: '/health',
+  },
   // {
   //   name: 'OpenBot',
   //   icon: '🤖',
@@ -510,7 +523,7 @@ const services = [
     icon: '🐳',
     category: 'platform',
     desc: {en: 'Docker container management UI', fa: 'رابط مدیریت کانتینرهای داکر'},
-    localPort: 9000,
+    localPort: 9003,
     subdomain: 'portainer',
     urlPath: '/',
     healthPath: '/api/system/status',
