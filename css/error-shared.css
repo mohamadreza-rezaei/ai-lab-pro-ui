@@ -1,0 +1,152 @@
+/* Shared error-page chrome — matches the main dashboard FAB + footer language */
+
+body {
+  padding-bottom: 5.5rem;
+}
+
+.fab-dock {
+  position: fixed;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  inset-inline-end: max(1rem, env(safe-area-inset-right));
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  pointer-events: none;
+}
+
+.fab {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--card-bg);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+  background: var(--card-hover);
+}
+
+.fab:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.fab svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.fab-secondary {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.05rem;
+}
+
+.error-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin: 0 auto 1.25rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.error-brand img {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  object-fit: contain;
+  display: block;
+}
+
+.error-brand-name {
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  background: var(--gradient-main);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.lang-fa .detail-value,
+body.lang-fa .retry-timer,
+body.lang-fa .progress-text,
+body.lang-fa .stat-value,
+body.lang-fa .breadcrumb-path,
+body.lang-fa .suggestion-url,
+body.lang-fa #error-id,
+body.lang-fa #timestamp,
+body.lang-fa #path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.footer-secondary {
+  margin-top: 0.55rem;
+  opacity: 0.85;
+}
+
+.status-value {
+  color: var(--accent-yellow);
+}
+
+.toast {
+  bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.75rem)) !important;
+}
+
+@media (max-width: 768px) {
+  .fab-dock {
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    inset-inline-end: max(0.85rem, env(safe-area-inset-right));
+    gap: 0.45rem;
+  }
+
+  .fab-secondary {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .error-card {
+    padding: 1.75rem 1.15rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-gradient,
+  .particle,
+  .big-404,
+  .big-icon,
+  .error-title,
+  .progress-circle,
+  .pulse-dot,
+  .status-dot,
+  .glitch {
+    animation: none !important;
+  }
+
+  .fab,
+  .btn,
+  .suggestion-card {
+    transition: none !important;
+  }
+}

@@ -447,6 +447,12 @@ body.lang-fa {
   color: var(--text-dim);
 }
 
+body.lang-fa .stat-label {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
 .stat-value {
   display: inline-flex;
   align-items: center;
@@ -464,8 +470,38 @@ body.lang-fa {
 
 .stat-value.mono {
   font-variant-numeric: tabular-nums;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.02em;
+}
+
+/* FA stats rail: Vazir for Persian labels + Latin digits (no monospace glyphs) */
+body.lang-fa .hero-meta,
+body.lang-fa .status-rail,
+body.lang-fa .status-rail .stat-label,
+body.lang-fa .status-rail .stat-value,
+body.lang-fa .status-rail .stat-value.mono,
+body.lang-fa .env-badge,
+body.lang-fa #uptime,
+body.lang-fa #last-refresh,
+body.lang-fa #date {
+  font-family:
+    'Vazirmatn',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* URLs / host:port always read LTR (even in RTL UI) */
+.service-url,
+.port-badge,
+.suggestion-url,
+.models-endpoint,
+.env-host {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
 }
 
 .dot {
@@ -1108,12 +1144,15 @@ body.lang-fa {
 }
 
 .service-url {
-  font-family: 'Courier New', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace;
   font-size: 0.75rem;
   color: var(--accent-cyan);
   opacity: 0.75;
   word-break: break-all;
   margin-bottom: 0.9rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
 }
 
 .card-footer {
@@ -2065,6 +2104,8 @@ body.lang-fa {
   border-radius: 6px;
   color: var(--text-muted, #8b8b9e);
   letter-spacing: 0.5px;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 /* ============= Settings Modal ============= */

@@ -84,7 +84,16 @@ function fillErrorDetails() {
   document.getElementById('error-id').textContent = errorId;
 
   const now = new Date();
-  const tsStr = now.toLocaleString(state.lang === 'fa' ? 'fa-IR' : 'en-US');
+  // Latin digits always — matches the main dashboard numeric style
+  const tsStr = now.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
   document.getElementById('timestamp').textContent = tsStr;
 
   document.getElementById('path').textContent = window.location.pathname || '/';

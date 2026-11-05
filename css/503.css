@@ -130,57 +130,6 @@ body.lang-fa {
   position: relative;
 }
 
-/* ========== Top Actions ========== */
-.top-actions {
-  position: absolute;
-  top: 0;
-  display: flex;
-  gap: 0.5rem;
-  z-index: 10;
-}
-
-[dir='ltr'] .top-actions {
-  right: 0;
-}
-
-[dir='rtl'] .top-actions {
-  left: 0;
-}
-
-.icon-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  backdrop-filter: var(--glass);
-  -webkit-backdrop-filter: var(--glass);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-}
-
-.icon-btn:hover {
-  background: var(--card-hover);
-  border-color: var(--accent-cyan);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
-}
-
-.icon-btn svg {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
-}
-
-.icon-btn:hover svg {
-  transform: scale(1.1) rotate(15deg);
-}
-
 /* ========== Main Error Card ========== */
 .error-card {
   background: var(--card-bg);

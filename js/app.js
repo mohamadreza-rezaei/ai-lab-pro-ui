@@ -1087,9 +1087,9 @@ function renderFeatured() {
           </div>
           <h3 class="service-name">${svc.name}</h3>
           <p class="service-desc">${svc.desc[state.lang]}</p>
-          <div class="service-url">${displayUrl}</div>
+          <div class="service-url" dir="ltr">${displayUrl}</div>
           <div class="card-footer">
-            <span class="port-badge">:${svc.localPort}</span>
+            <span class="port-badge" dir="ltr">:${svc.localPort}</span>
             <span class="arrow">${state.lang === 'fa' ? '←' : '→'}</span>
           </div>
         </a>`;
@@ -1153,27 +1153,40 @@ function setupFeaturedCarousel() {
   });
 
   if (carousel) {
+    const DRAG_THRESHOLD_PX = 10;
+
     const onPointerMove = (e) => {
-      if (!featuredCarousel.dragging) return;
+      if (featuredCarousel.pointerId == null) return;
       if (e.pointerId !== featuredCarousel.pointerId) return;
       const track = document.getElementById('featured-track');
       if (!track) return;
 
       const dx = e.clientX - featuredCarousel.startX;
       featuredCarousel.lastX = e.clientX;
-      // Ignore tiny jitter so a normal tap still opens the link
-      if (!featuredCarousel.dragMoved && Math.abs(dx) < 8) return;
 
-      featuredCarousel.dragMoved = true;
-      carousel.classList.add('is-dragging');
+      // Defer drag until real movement so taps still activate <a href>
+      if (!featuredCarousel.dragging) {
+        if (Math.abs(dx) < DRAG_THRESHOLD_PX) return;
+        featuredCarousel.dragging = true;
+        featuredCarousel.dragMoved = true;
+        featuredCarousel.paused = true;
+        carousel.classList.add('is-dragging');
+        try {
+          carousel.setPointerCapture(e.pointerId);
+        } catch (_) {
+          /* capture optional */
+        }
+      }
+
       e.preventDefault();
       track.style.transition = 'none';
       track.style.transform = `translateX(${featuredCarousel.baseTranslate + dx}px)`;
     };
 
     const endDrag = (e) => {
-      if (!featuredCarousel.dragging) return;
+      if (featuredCarousel.pointerId == null) return;
       if (
+        e.pointerId != null &&
         featuredCarousel.pointerId != null &&
         e.pointerId !== featuredCarousel.pointerId
       ) {
@@ -1206,11 +1219,10 @@ function setupFeaturedCarousel() {
       featuredCarousel.pointerId = null;
       featuredCarousel.paused = isFeaturedSectionHovered();
 
-      // Tap / no real drag — leave the following click alone so <a> navigates
+      // Tap / no real drag — do not touch transform or swallow the click
       if (!moved || !step || maxIndex <= 0) {
         featuredCarousel.dragMoved = false;
         featuredCarousel.suppressClick = false;
-        showFeaturedSlide(featuredCarousel.index);
         startFeaturedCarousel();
         return;
       }
@@ -1219,7 +1231,6 @@ function setupFeaturedCarousel() {
       const dir = getFeaturedDir();
       const raw = (featuredCarousel.baseTranslate + dx) / (dir * step);
       let next = Math.round(raw);
-      // Decisive swipe: always move at least one step in swipe direction
       if (Math.abs(dx) >= Math.max(36, step * 0.18)) {
         const dirStep = Math.sign(dx / (dir * step)) || (dx * dir < 0 ? 1 : -1);
         if (next === featuredCarousel.index) next = featuredCarousel.index + dirStep;
@@ -1230,7 +1241,7 @@ function setupFeaturedCarousel() {
       featuredCarousel.dragMoved = false;
       window.setTimeout(() => {
         featuredCarousel.suppressClick = false;
-      }, 80);
+      }, 120);
       startFeaturedCarousel();
     };
 
@@ -1247,13 +1258,11 @@ function setupFeaturedCarousel() {
         slides.length,
         getFeaturedVisibleCount(slides.length),
       );
+      // Static carousel (all cards visible): never hijack pointers — let links work
       if (!track || maxIndex <= 0) return;
 
-      // Do NOT preventDefault on pointerdown — that blocks <a> navigation on tap.
-      // Native link dragging is already stopped via dragstart + CSS user-select.
-
       const step = getFeaturedStep(track, slides);
-      featuredCarousel.dragging = true;
+      featuredCarousel.dragging = false;
       featuredCarousel.dragMoved = false;
       featuredCarousel.suppressClick = false;
       featuredCarousel.startX = e.clientX;
@@ -1262,26 +1271,20 @@ function setupFeaturedCarousel() {
       featuredCarousel.pointerId = e.pointerId;
       featuredCarousel.paused = true;
 
-      try {
-        carousel.setPointerCapture(e.pointerId);
-      } catch (_) {
-        /* capture optional */
-      }
-
       window.addEventListener('pointermove', onPointerMove, {passive: false});
       window.addEventListener('pointerup', endDrag);
       window.addEventListener('pointercancel', endDrag);
     });
 
     carousel.addEventListener('lostpointercapture', () => {
-      if (!featuredCarousel.dragging) return;
+      if (!featuredCarousel.dragging && featuredCarousel.pointerId == null) return;
       endDrag({
         pointerId: featuredCarousel.pointerId,
         clientX: featuredCarousel.lastX,
       });
     });
 
-    // Only swallow the click that follows a real swipe, not a plain tap
+    // Swallow only the click that follows a real swipe
     carousel.addEventListener(
       'click',
       (e) => {
@@ -1348,9 +1351,9 @@ function renderServices() {
                 </div>
                 <h3 class="service-name">${svc.name}</h3>
                 <p class="service-desc">${svc.desc[state.lang]}</p>
-                <div class="service-url">${displayUrl}</div>
+                <div class="service-url" dir="ltr">${displayUrl}</div>
                 <div class="card-footer">
-                  <span class="port-badge">:${svc.localPort}</span>
+                  <span class="port-badge" dir="ltr">:${svc.localPort}</span>
                   <span class="arrow">${state.lang === 'fa' ? '←' : '→'}</span>
                 </div>
               </a>`;
@@ -1535,17 +1538,39 @@ async function loadModels() {
 /* ============================================
 Meta Info (Clock, Uptime, Date)
 ============================================ */
-function updateMeta() {
-  const now = new Date();
-  if (state.lang === 'fa') {
-    document.getElementById('date').textContent = now.toLocaleDateString('fa-IR');
-  } else {
-    document.getElementById('date').textContent = now.toLocaleDateString('en-US', {
+/* Latin digits always; FA dates use Solar Hijri (Shamsi) month names */
+function formatStatDate(now) {
+  if (state.lang !== 'fa') {
+    return now.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
     });
   }
+
+  const parts = new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-latn', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).formatToParts(now);
+  const get = (type) => parts.find((p) => p.type === type)?.value || '';
+  // e.g. "جمعه، 15 آبان 1405" (Shamsi labels, Latin digits)
+  return `${get('weekday')}، ${get('day')} ${get('month')} ${get('year')}`;
+}
+
+function formatStatTime(now) {
+  return now.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
+function updateMeta() {
+  const now = new Date();
+  document.getElementById('date').textContent = formatStatDate(now);
 
   const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
   const h = Math.floor(elapsed / 3600);
@@ -1556,11 +1581,7 @@ function updateMeta() {
 }
 
 function updateLastRefresh() {
-  const now = new Date();
-  document.getElementById('last-refresh').textContent = now.toLocaleTimeString(
-    state.lang === 'fa' ? 'fa-IR' : 'en-US',
-    {hour12: false},
-  );
+  document.getElementById('last-refresh').textContent = formatStatTime(new Date());
 }
 
 /* ============================================

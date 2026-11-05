@@ -152,57 +152,6 @@ body.lang-fa {
   position: relative;
 }
 
-/* ========== Top Actions ========== */
-.top-actions {
-  position: absolute;
-  top: 0;
-  display: flex;
-  gap: 0.5rem;
-  z-index: 10;
-}
-
-[dir="ltr"] .top-actions {
-  right: 0;
-}
-
-[dir="rtl"] .top-actions {
-  left: 0;
-}
-
-.icon-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  backdrop-filter: var(--glass);
-  -webkit-backdrop-filter: var(--glass);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-}
-
-.icon-btn:hover {
-  background: var(--card-hover);
-  border-color: var(--accent-cyan);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
-}
-
-.icon-btn svg {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
-}
-
-.icon-btn:hover svg {
-  transform: scale(1.1) rotate(15deg);
-}
-
 /* ========== Main Card ========== */
 .error-card {
   background: var(--card-bg);
@@ -267,15 +216,36 @@ body.lang-fa {
   overflow: hidden;
 }
 
+.breadcrumb-root {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
 .breadcrumb-path {
   color: var(--accent-red);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 300px;
+  max-width: min(300px, 55vw);
   display: inline-block;
   vertical-align: middle;
+}
+
+.error-code-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 auto 0.35rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(176, 38, 255, 0.35);
+  background: rgba(176, 38, 255, 0.12);
+  color: var(--accent-purple);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ========== Big 404 ========== */
@@ -383,6 +353,26 @@ body.lang-fa {
   animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;
 }
 
+.search-hotkey {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  inset-inline-end: 0.85rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  pointer-events: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.search-container:focus-within .search-hotkey {
+  opacity: 0;
+}
+
 .search-icon {
   position: absolute;
   top: 50%;
@@ -418,10 +408,20 @@ body.lang-fa {
 
 [dir="ltr"] .search-input {
   padding-left: 2.75rem;
+  padding-right: 2.6rem;
 }
 
 [dir="rtl"] .search-input {
   padding-right: 2.75rem;
+  padding-left: 2.6rem;
+}
+
+.search-input::-webkit-search-decoration,
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-results-button,
+.search-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .search-input::placeholder {
