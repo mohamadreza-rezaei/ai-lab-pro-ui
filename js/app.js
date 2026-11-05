@@ -5,7 +5,9 @@ const i18n = {
     subtitle: 'Launch chat, agents, gateways, and ops tools from one control deck.',
     checking: 'Checking...',
     never: 'Never',
-    searchPlaceholder: 'Jump to a service… (grafana, openclaw)',
+    searchPlaceholder: 'Jump to a service…',
+    searchAria: 'Search services',
+    searchClear: 'Clear search',
     statStatus: 'Fleet',
     statUptime: 'Session',
     statDate: 'Today',
@@ -87,7 +89,9 @@ const i18n = {
     subtitle: 'چت، عامل‌ها، درگاه‌ها و ابزارهای عملیات را از یک داشبورد کنترل باز کنید.',
     checking: 'در حال بررسی...',
     never: 'هرگز',
-    searchPlaceholder: 'پرش به سرویس… (grafana، openclaw)',
+    searchPlaceholder: 'پرش به سرویس…',
+    searchAria: 'جستجوی سرویس‌ها',
+    searchClear: 'پاک کردن جستجو',
     statStatus: 'ناوگان',
     statUptime: 'نشست',
     statDate: 'امروز',
@@ -732,6 +736,14 @@ function applyLanguage() {
   document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
     const key = el.dataset.i18nPlaceholder;
     if (tr[key]) el.placeholder = tr[key];
+  });
+
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    const key = el.dataset.i18nAria;
+    if (tr[key]) {
+      el.setAttribute('aria-label', tr[key]);
+      el.title = tr[key];
+    }
   });
 
   // Update flag
@@ -1568,10 +1580,19 @@ Search
 ============================================ */
 function setupSearch() {
   const searchInput = document.getElementById('search');
+  const searchClear = document.getElementById('search-clear');
+  const searchShell = searchInput?.closest('.search-container');
   const noResults = document.getElementById('no-results');
+  if (!searchInput) return;
 
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.trim().toLowerCase();
+  const syncSearchChrome = () => {
+    const hasQuery = searchInput.value.length > 0;
+    searchShell?.classList.toggle('has-query', hasQuery);
+    if (searchClear) searchClear.hidden = !hasQuery;
+  };
+
+  const runFilter = () => {
+    const query = searchInput.value.trim().toLowerCase();
     const cards = document.querySelectorAll('.service-card');
     const categorySections = document.querySelectorAll('.category');
     let totalVisible = 0;
@@ -1599,7 +1620,16 @@ function setupSearch() {
     });
 
     noResults.classList.toggle('show', totalVisible === 0 && query !== '');
+    syncSearchChrome();
+  };
+
+  searchInput.addEventListener('input', runFilter);
+  searchClear?.addEventListener('click', () => {
+    searchInput.value = '';
+    runFilter();
+    searchInput.focus();
   });
+  syncSearchChrome();
 }
 
 /* ============================================

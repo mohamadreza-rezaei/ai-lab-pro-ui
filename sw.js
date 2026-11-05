@@ -1,5 +1,5 @@
 /* AI Lab Pro — service worker (cache shell, network for APIs) */
-const CACHE_VERSION = 'ailab-ui-v1.4.0';
+const CACHE_VERSION = 'ailab-ui-v1.4.1';
 const SHELL = [
   './',
   './index.html',

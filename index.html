@@ -89,17 +89,39 @@
       </div>
     </div>
 
-    <div class="search-container">
-      <span class="search-icon" aria-hidden="true">🔍</span>
+    <div class="search-container" role="search">
+      <span class="search-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+      </span>
       <input
         autocomplete="off"
         class="search-input"
         data-i18n-placeholder="searchPlaceholder"
+        data-i18n-aria="searchAria"
         id="search"
         placeholder="Jump to a service… (grafana, openclaw)"
         spellcheck="false"
         type="search"
+        enterkeyhint="search"
+        aria-label="Search services"
       />
+      <kbd class="search-hotkey" aria-hidden="true">/</kbd>
+      <button
+        type="button"
+        class="search-clear"
+        id="search-clear"
+        data-i18n-aria="searchClear"
+        aria-label="Clear search"
+        hidden
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
     </div>
   </header>
 
