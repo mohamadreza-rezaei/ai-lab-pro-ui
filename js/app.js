@@ -1161,7 +1161,8 @@ function setupFeaturedCarousel() {
 
       const dx = e.clientX - featuredCarousel.startX;
       featuredCarousel.lastX = e.clientX;
-      if (!featuredCarousel.dragMoved && Math.abs(dx) < 6) return;
+      // Ignore tiny jitter so a normal tap still opens the link
+      if (!featuredCarousel.dragMoved && Math.abs(dx) < 8) return;
 
       featuredCarousel.dragMoved = true;
       carousel.classList.add('is-dragging');
@@ -1205,7 +1206,10 @@ function setupFeaturedCarousel() {
       featuredCarousel.pointerId = null;
       featuredCarousel.paused = isFeaturedSectionHovered();
 
+      // Tap / no real drag — leave the following click alone so <a> navigates
       if (!moved || !step || maxIndex <= 0) {
+        featuredCarousel.dragMoved = false;
+        featuredCarousel.suppressClick = false;
         showFeaturedSlide(featuredCarousel.index);
         startFeaturedCarousel();
         return;
@@ -1223,10 +1227,10 @@ function setupFeaturedCarousel() {
       next = wrapFeaturedIndex(next, maxIndex);
       showFeaturedSlide(next);
       featuredCarousel.suppressClick = true;
+      featuredCarousel.dragMoved = false;
       window.setTimeout(() => {
         featuredCarousel.suppressClick = false;
-        featuredCarousel.dragMoved = false;
-      }, 50);
+      }, 80);
       startFeaturedCarousel();
     };
 
@@ -1245,8 +1249,8 @@ function setupFeaturedCarousel() {
       );
       if (!track || maxIndex <= 0) return;
 
-      // Stop native <a> drag / text selection from stealing the gesture
-      if (e.pointerType === 'mouse') e.preventDefault();
+      // Do NOT preventDefault on pointerdown — that blocks <a> navigation on tap.
+      // Native link dragging is already stopped via dragstart + CSS user-select.
 
       const step = getFeaturedStep(track, slides);
       featuredCarousel.dragging = true;
@@ -1257,7 +1261,6 @@ function setupFeaturedCarousel() {
       featuredCarousel.baseTranslate = getFeaturedTranslate(featuredCarousel.index, step);
       featuredCarousel.pointerId = e.pointerId;
       featuredCarousel.paused = true;
-      track.style.transition = 'none';
 
       try {
         carousel.setPointerCapture(e.pointerId);
@@ -1278,17 +1281,15 @@ function setupFeaturedCarousel() {
       });
     });
 
-    // After a drag, block the synthetic click so cards don't open mid-swipe
+    // Only swallow the click that follows a real swipe, not a plain tap
     carousel.addEventListener(
       'click',
       (e) => {
-        if (!featuredCarousel.suppressClick && !featuredCarousel.dragMoved) return;
-        if (featuredCarousel.suppressClick || featuredCarousel.dragMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-          featuredCarousel.suppressClick = false;
-          featuredCarousel.dragMoved = false;
-        }
+        if (!featuredCarousel.suppressClick) return;
+        e.preventDefault();
+        e.stopPropagation();
+        featuredCarousel.suppressClick = false;
+        featuredCarousel.dragMoved = false;
       },
       true,
     );
