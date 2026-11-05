@@ -1295,6 +1295,7 @@ function setupFeaturedCarousel() {
   }
 
   window.addEventListener('resize', () => {
+    updateGlobalStatus();
     if (!document.querySelector('.featured-slide')) return;
     showFeaturedSlide(featuredCarousel.index);
     startFeaturedCarousel();
