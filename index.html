@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/style.css">
-  <meta name="description" content="AI Lab Pro — quick access to all your self-hosted services">
+  <meta name="description" content="AI Lab Pro — launch chat, agents, gateways, and ops tools from one control deck">
   <meta name="theme-color" content="#05050f">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,7 +13,7 @@
 
   <meta property="og:title" content="AI Lab Pro">
   <meta property="og:type" content="website">
-  <meta property="og:description" content="Quick access to all your self-hosted services">
+  <meta property="og:description" content="Launch chat, agents, gateways, and ops tools from one control deck">
   <meta property="og:image" content="icons/icon-512.png">
   <meta property="og:image:alt" content="AI Lab Pro">
 
@@ -33,51 +33,75 @@
 <div class="bg-grid"></div>
 
 <div class="container">
-  <!-- ============ HEADER ============ -->
-  <header class="header">
-    <div class="logo">
-      <img src="img/logo.png" alt="AI Lab Pro" width="120" height="120" decoding="async">
-    </div>
-    <h1 class="title" data-i18n="title">AI Lab Pro</h1>
-    <p class="subtitle" data-i18n="subtitle">Quick access to all your self-hosted services</p>
+  <!-- ============ HERO ============ -->
+  <header class="header hero">
+    <div class="hero-aura" aria-hidden="true"></div>
 
-    <div
-      class="env-badge"
-      id="env-badge"
-      onclick="openSettings()"
-      title="Click to change environment"
-    >
-      <span class="env-dot" id="env-dot"></span>
-      <span id="env-label">🖥️ Local</span>
-      <span class="env-hint">⚙️</span>
+    <div class="hero-brand">
+      <div class="logo">
+        <img src="img/logo.png" alt="" width="140" height="140" decoding="async">
+      </div>
+      <div class="hero-copy">
+        <p class="hero-kicker" data-i18n="heroKicker">Self-hosted AI stack</p>
+        <h1 class="title" data-i18n="title">AI Lab Pro</h1>
+        <p class="subtitle" data-i18n="subtitle">
+          Launch chat, agents, gateways, and ops tools from one control deck.
+        </p>
+      </div>
     </div>
 
-    <div class="meta-bar">
-          <span class="meta-item">
+    <div class="hero-panel">
+      <button
+        type="button"
+        class="env-badge"
+        id="env-badge"
+        onclick="openSettings()"
+        title="Open settings / environment"
+      >
+        <span class="env-dot" id="env-dot"></span>
+        <span class="env-badge-copy">
+          <span class="env-badge-label" data-i18n="environment">Environment</span>
+          <span class="env-badge-value" id="env-label">Local</span>
+        </span>
+        <span class="env-hint" aria-hidden="true">⚙️</span>
+      </button>
+
+      <div class="status-rail" role="group" aria-label="Lab status">
+        <div class="stat">
+          <span class="stat-label" data-i18n="statStatus">Fleet</span>
+          <span class="stat-value">
             <span class="dot" id="global-dot"></span>
             <span data-i18n="checking" id="global-status">Checking...</span>
           </span>
-      <span class="meta-item"><span>⏱️</span> <span id="uptime">00:00:00</span></span>
-      <span class="meta-item hide-mobile"><span>📅</span> <span id="date">--</span></span>
-      <span class="meta-item hide-mobile"
-      ><span>🔄</span> <span data-i18n="never" id="last-refresh">Never</span></span
-      >
+        </div>
+        <div class="stat">
+          <span class="stat-label" data-i18n="statUptime">Session</span>
+          <span class="stat-value mono" id="uptime">00:00:00</span>
+        </div>
+        <div class="stat hide-mobile">
+          <span class="stat-label" data-i18n="statDate">Today</span>
+          <span class="stat-value" id="date">--</span>
+        </div>
+        <div class="stat hide-mobile">
+          <span class="stat-label" data-i18n="statSynced">Synced</span>
+          <span class="stat-value mono" id="last-refresh">Never</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input
+        autocomplete="off"
+        class="search-input"
+        data-i18n-placeholder="searchPlaceholder"
+        id="search"
+        placeholder="Jump to a service… (grafana, openclaw)"
+        spellcheck="false"
+        type="search"
+      />
     </div>
   </header>
-
-  <!-- ============ SEARCH ============ -->
-  <div class="search-container">
-    <span class="search-icon">🔍</span>
-    <input
-      autocomplete="off"
-      class="search-input"
-      data-i18n-placeholder="searchPlaceholder"
-      id="search"
-      placeholder="Search services... (e.g. grafana)"
-      spellcheck="false"
-      type="text"
-    />
-  </div>
 
   <!-- ============ FEATURED ============ -->
   <section class="featured-section" id="featured-section" aria-labelledby="featured-heading">
