@@ -756,6 +756,7 @@ function applyLanguage() {
   updateEnvBadge();
   renderServices();
   updateGlobalStatus();
+  updateMeta();
 }
 
 function toggleLanguage() {
