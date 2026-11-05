@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/style.css?v=1.5.2">
+  <link rel="stylesheet" href="css/style.css?v=1.5.3">
   <meta name="description" content="AI Lab Pro — launch chat, agents, gateways, and ops tools from one control deck">
   <meta name="theme-color" content="#05050f">
   <meta name="mobile-web-app-capable" content="yes">
@@ -51,40 +51,42 @@
     </div>
 
     <div class="hero-panel">
-      <button
-        type="button"
-        class="env-badge"
-        id="env-badge"
-        onclick="openSettings()"
-        title="Open settings / environment"
-      >
-        <span class="env-dot" id="env-dot"></span>
-        <span class="env-badge-copy">
-          <span class="env-badge-label" data-i18n="environment">Environment</span>
-          <span class="env-badge-value" id="env-label">Local</span>
-        </span>
-        <span class="env-hint" aria-hidden="true">⚙️</span>
-      </button>
-
-      <div class="status-rail" role="group" aria-label="Lab status">
-        <div class="stat stat-fleet">
-          <span class="stat-label" data-i18n="statStatus">Fleet</span>
-          <span class="stat-value">
-            <span class="dot" id="global-dot"></span>
-            <span data-i18n="checking" id="global-status">Checking...</span>
+      <div class="hero-meta">
+        <button
+          type="button"
+          class="env-badge"
+          id="env-badge"
+          onclick="openSettings()"
+          title="Open settings / environment"
+        >
+          <span class="env-dot" id="env-dot"></span>
+          <span class="env-badge-copy">
+            <span class="env-badge-label" data-i18n="environment">Environment</span>
+            <span class="env-badge-value" id="env-label">Local</span>
           </span>
-        </div>
-        <div class="stat stat-session">
-          <span class="stat-label" data-i18n="statUptime">Session</span>
-          <span class="stat-value mono" id="uptime">00:00:00</span>
-        </div>
-        <div class="stat stat-date">
-          <span class="stat-label" data-i18n="statDate">Today</span>
-          <span class="stat-value" id="date">--</span>
-        </div>
-        <div class="stat stat-synced">
-          <span class="stat-label" data-i18n="statSynced">Synced</span>
-          <span class="stat-value mono" id="last-refresh">—</span>
+          <span class="env-hint" aria-hidden="true">⚙️</span>
+        </button>
+
+        <div class="status-rail" role="group" aria-label="Lab status">
+          <div class="stat stat-fleet">
+            <span class="stat-label" data-i18n="statStatus">Fleet</span>
+            <span class="stat-value">
+              <span class="dot" id="global-dot"></span>
+              <span data-i18n="checking" id="global-status">Checking...</span>
+            </span>
+          </div>
+          <div class="stat stat-session">
+            <span class="stat-label" data-i18n="statUptime">Session</span>
+            <span class="stat-value mono" id="uptime">00:00:00</span>
+          </div>
+          <div class="stat stat-date">
+            <span class="stat-label" data-i18n="statDate">Today</span>
+            <span class="stat-value" id="date">--</span>
+          </div>
+          <div class="stat stat-synced">
+            <span class="stat-label" data-i18n="statSynced">Synced</span>
+            <span class="stat-value mono" id="last-refresh">—</span>
+          </div>
         </div>
       </div>
     </div>

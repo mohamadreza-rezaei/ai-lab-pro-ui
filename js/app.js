@@ -36,8 +36,11 @@ const i18n = {
     toastSwitchedLocal: '🖥️ Switched to Local',
     toastSwitchedServer: '🌐 Switched to Server',
     allOnline: (n) => `All services active (${n}/${n})`,
+    allOnlineShort: (n) => `All up · ${n}`,
     partialOnline: (a, b) => `${a} of ${b} active`,
+    partialOnlineShort: (a, b) => `${a}/${b} up`,
     allOffline: 'Services unavailable',
+    allOfflineShort: 'Offline',
     catChat: 'Chat & Interfaces',
     catGateways: 'Gateways & Proxies',
     catBuilders: 'AI Builders',
@@ -115,8 +118,11 @@ const i18n = {
     toastSwitchedLocal: '🖥️ تغییر به حالت محلی',
     toastSwitchedServer: '🌐 تغییر به حالت سرور',
     allOnline: (n) => `همه سرویس‌ها فعال (${n}/${n})`,
+    allOnlineShort: (n) => `همه فعال · ${n}`,
     partialOnline: (a, b) => `${a} از ${b} فعال`,
+    partialOnlineShort: (a, b) => `${a}/${b} فعال`,
     allOffline: 'سرویس‌ها در دسترس نیستند',
+    allOfflineShort: 'آفلاین',
     catChat: 'چت و رابط‌ها',
     catGateways: 'درگاه‌ها و پروکسی‌ها',
     catBuilders: 'سازندگان هوش مصنوعی',
@@ -1558,6 +1564,10 @@ function updateLastRefresh() {
 /* ============================================
 Global Status
 ============================================ */
+function isCompactStatus() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+
 function updateGlobalStatus() {
   const statuses = document.querySelectorAll('.status-badge[data-health]');
   const online = document.querySelectorAll('.status-badge.online').length;
@@ -1565,6 +1575,7 @@ function updateGlobalStatus() {
   const dot = document.getElementById('global-dot');
   const txt = document.getElementById('global-status');
   const tr = t();
+  const compact = isCompactStatus();
 
   dot.classList.remove('live', 'warn', 'error');
 
@@ -1574,13 +1585,15 @@ function updateGlobalStatus() {
   }
 
   if (online === total) {
-    txt.textContent = tr.allOnline(total);
+    txt.textContent = compact ? tr.allOnlineShort(total) : tr.allOnline(total);
     dot.classList.add('live');
   } else if (online === 0) {
-    txt.textContent = tr.allOffline;
+    txt.textContent = compact ? tr.allOfflineShort : tr.allOffline;
     dot.classList.add('error');
   } else {
-    txt.textContent = tr.partialOnline(online, total);
+    txt.textContent = compact
+      ? tr.partialOnlineShort(online, total)
+      : tr.partialOnline(online, total);
     dot.classList.add('warn');
   }
 }

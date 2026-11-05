@@ -395,6 +395,15 @@ body.lang-fa {
   gap: 0.75rem;
 }
 
+.hero-meta {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
 .status-rail {
   flex: 1 1 18rem;
   display: grid;
@@ -1677,42 +1686,82 @@ body.lang-fa {
     grid-template-columns: 1fr;
   }
 
+  /*
+   * Mobile hero metrics — Linear-style meta strip.
+   * One compact env chip + one typographic status line. No tall cards/pills.
+   */
   .hero-panel {
     flex-direction: column;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0;
     width: 100%;
+  }
+
+  .hero-meta {
+    width: auto;
+    max-width: 100%;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.85rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .env-badge {
-    width: auto;
+    width: max-content;
     max-width: 100%;
     align-self: center;
-    justify-content: flex-start;
-    padding: 0.5rem 0.8rem;
-    gap: 0.5rem;
+    justify-content: center;
+    padding: 0.15rem 0.2rem;
+    gap: 0.45rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 0.5rem;
+  }
+
+  .env-badge:hover {
+    transform: none;
+    background: rgba(0, 229, 255, 0.08);
+    border-color: transparent;
+    box-shadow: none;
   }
 
   .env-badge-label {
-    font-size: 0.6rem;
+    display: none;
+  }
+
+  .env-badge-copy {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
   }
 
   .env-badge-value {
-    font-size: 0.86rem;
+    font-size: 0.84rem;
+    font-weight: 700;
   }
 
-  /*
-   * Mobile hero metrics: drop the tall glass card.
-   * Individual compact pills keep all four stats visible without dead space.
-   */
+  .env-hint {
+    opacity: 0.45;
+    font-size: 0.78rem;
+  }
+
   .status-rail {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    align-content: center;
-    gap: 0.4rem;
-    width: 100%;
+    gap: 0;
+    width: auto;
+    max-width: 100%;
     min-width: 0;
     min-height: 0;
     height: auto;
@@ -1725,55 +1774,76 @@ body.lang-fa {
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .status-rail::-webkit-scrollbar {
+    display: none;
   }
 
   .stat,
   .stat.hide-mobile {
     display: inline-flex !important;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
+    gap: 0.3rem;
     min-width: 0;
-    max-width: 100%;
+    max-width: none;
     height: auto;
-    padding: 0.42rem 0.7rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-strong);
-    border-radius: 999px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
-  .stat + .stat::before,
-  .stat:nth-child(2n)::before {
-    display: none !important;
-    content: none !important;
-  }
-
-  .stat-label {
-    font-size: 0.58rem;
-    letter-spacing: 0.05em;
+  .stat + .stat::before {
+    content: '·';
+    display: inline-block !important;
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    margin: 0 0.45rem;
+    background: none;
+    color: var(--text-dim);
+    opacity: 0.55;
+    font-size: 0.85rem;
     line-height: 1;
   }
 
+  .stat:nth-child(2n)::before {
+    display: inline-block !important;
+  }
+
+  .stat-label {
+    display: none;
+  }
+
   .stat-value {
-    font-size: 0.76rem;
-    line-height: 1.15;
+    font-size: 0.78rem;
+    font-weight: 550;
+    line-height: 1.2;
+    color: var(--text-dim);
   }
 
-  .stat-fleet {
-    flex: 1 1 100%;
-    max-width: 100%;
-    justify-content: flex-start;
+  .stat-fleet .stat-value {
+    color: var(--text-soft);
+    font-weight: 650;
   }
 
+  .stat-fleet,
   .stat-session,
   .stat-date,
   .stat-synced {
-    flex: 1 1 calc(33.333% - 0.4rem);
-    min-width: 5.5rem;
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: none;
   }
 
   .hide-mobile:not(.stat) {
@@ -1845,23 +1915,18 @@ body.lang-fa {
     height: 4.6rem;
   }
 
-  .stat {
-    padding: 0.38rem 0.6rem;
-  }
-
-  .stat-label {
-    display: none;
+  .hero-meta {
+    padding: 0.5rem 0.75rem 0.55rem;
+    gap: 0.45rem;
+    border-radius: 0.9rem;
   }
 
   .stat-value {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
   }
 
-  .stat-session,
-  .stat-date,
-  .stat-synced {
-    flex: 1 1 calc(33.333% - 0.35rem);
-    min-width: 0;
+  .stat + .stat::before {
+    margin: 0 0.35rem;
   }
 
   .search-input {
