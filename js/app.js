@@ -14,15 +14,10 @@ const i18n = {
     statSynced: 'Synced',
     noResults: 'No results found!',
     modelsTitle: 'Active Models',
+    modelsSubtitle: 'Live inventory from LiteLLM for this environment.',
     loading: 'Loading...',
-    actionsTitle: 'Quick Actions',
-    copyUrl: 'Copy API URL',
-    refresh: 'Refresh Status',
-    healthCheck: 'Health Check',
-    apiDocs: 'API Docs',
-    footerHelp:
-      'Click or use keyboard • Press <kbd>/</kbd> to search • <kbd>Esc</kbd> to clear • <kbd>?</kbd> for help',
-    footerMade: 'AI Lab Pro · Made with ❤️',
+    healthCheck: 'Health',
+    footerTagline: 'Self-hosted control deck',
     version: 'Version',
     helpTitle: 'Keyboard Shortcuts',
     helpSearch: 'Focus search',
@@ -98,15 +93,10 @@ const i18n = {
     statSynced: 'همگام',
     noResults: 'نتیجه‌ای یافت نشد!',
     modelsTitle: 'مدل‌های فعال',
+    modelsSubtitle: 'فهرست زنده از LiteLLM برای همین محیط.',
     loading: 'در حال بارگذاری...',
-    actionsTitle: 'اقدامات سریع',
-    copyUrl: 'کپی آدرس API',
-    refresh: 'بروزرسانی وضعیت',
-    healthCheck: 'بررسی سلامت',
-    apiDocs: 'مستندات API',
-    footerHelp:
-      'کلیک کنید یا از کیبورد استفاده کنید • <kbd>/</kbd> جستجو • <kbd>Esc</kbd> پاک کردن • <kbd>?</kbd> راهنما',
-    footerMade: 'AI Lab Pro · ساخته شده با ❤️',
+    healthCheck: 'سلامت',
+    footerTagline: 'داشبورد کنترل خودمیزبان',
     version: 'نسخه',
     helpTitle: 'میانبرهای کیبورد',
     helpSearch: 'فوکوس روی جستجو',
@@ -1471,6 +1461,20 @@ async function fetchModelsFrom(url, apiKey) {
   }
 }
 
+function modelProvider(id) {
+  const name = String(id || '').toLowerCase();
+  if (name.includes('claude') || name.includes('anthropic')) return 'anthropic';
+  if (name.includes('gpt') || name.includes('openai') || /(^|[^a-z])o[1-9]([^a-z]|$)/.test(name))
+    return 'openai';
+  if (name.includes('gemini') || name.includes('google')) return 'google';
+  if (name.includes('qwen') || name.includes('dashscope')) return 'qwen';
+  if (name.includes('deepseek')) return 'deepseek';
+  if (name.includes('mistral') || name.includes('mixtral')) return 'mistral';
+  if (name.includes('llama') || name.includes('meta')) return 'meta';
+  if (name.includes('grok') || name.includes('xai')) return 'xai';
+  return 'other';
+}
+
 async function loadModels() {
   const box = document.getElementById('models-box');
   const countEl = document.getElementById('models-count');
@@ -1494,15 +1498,21 @@ async function loadModels() {
         box.innerHTML = `<span class="models-empty">${tr.noResults.replace('found!', 'available')}</span>`;
         return;
       }
-      box.innerHTML = models
+      const tags = models
         .map((m) => {
           const id = typeof m === 'string' ? m : m.id || m.model || '';
-          if (!id) return '';
-          const isLocal = ['qwen', 'llama', 'deepseek', 'openhermes', 'mistral', 'gemma'].some(
-            (x) => id.toLowerCase().includes(x),
-          );
-          return `<span class="model-tag ${isLocal ? 'local' : 'cloud'}">${id}</span>`;
+          if (!id) return null;
+          const provider = modelProvider(id);
+          return {id, provider};
         })
+        .filter(Boolean)
+        .sort((a, b) => a.id.localeCompare(b.id));
+
+      box.innerHTML = tags
+        .map(
+          ({id, provider}) =>
+            `<span class="model-tag" data-provider="${provider}" title="${id}"><span class="model-tag-dot" aria-hidden="true"></span>${id}</span>`,
+        )
         .join('');
       return;
     } catch (_) {

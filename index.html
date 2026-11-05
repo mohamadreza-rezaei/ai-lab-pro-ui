@@ -153,51 +153,49 @@
   </main>
 
   <!-- ============ MODELS ============ -->
-  <section class="models-section">
-    <div class="section-title">
-      <span class="section-title-icon">🤖</span>
-      <span data-i18n="modelsTitle">Active Models</span>
-      <span class="section-title-count" id="models-count">0</span>
+  <section class="models-section" aria-labelledby="models-heading">
+    <div class="models-header">
+      <div class="models-heading-block">
+        <h2 class="models-title" id="models-heading">
+          <span class="models-title-icon" aria-hidden="true">🤖</span>
+          <span data-i18n="modelsTitle">Active Models</span>
+        </h2>
+        <p class="models-subtitle" data-i18n="modelsSubtitle">
+          Live inventory from LiteLLM for this environment.
+        </p>
+      </div>
+      <span class="models-count-pill" id="models-count" title="Model count">0</span>
     </div>
     <div class="models-box" id="models-box">
       <span class="models-empty" data-i18n="loading">Loading...</span>
     </div>
   </section>
 
-  <!-- ============ QUICK ACTIONS ============ -->
-  <section class="actions-section">
-    <div class="section-title">
-      <span class="section-title-icon">⚡</span>
-      <span data-i18n="actionsTitle">Quick Actions</span>
-    </div>
-    <div class="actions">
-      <button class="action-btn" onclick="copyBaseUrl()">
-        📋 <span data-i18n="copyUrl">Copy API URL</span>
-      </button>
-      <button class="action-btn" onclick="refreshStatus()">
-        🔄 <span data-i18n="refresh">Refresh Status</span>
-      </button>
-      <a class="action-btn" href="/health" rel="noopener" target="_blank"
-      >❤️ <span data-i18n="healthCheck">Health Check</span></a
-      >
-      <a class="action-btn" href="/api" rel="noopener" target="_blank"
-      >📖 <span data-i18n="apiDocs">API Docs</span></a
-      >
-    </div>
-  </section>
-
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
-    <p data-i18n="footerHelp">
-      Click or use keyboard • Press <kbd>/</kbd> to search • <kbd>Esc</kbd> to clear •
-      <kbd>?</kbd> for help
-    </p>
-    <p class="footer-links">
-      <span data-i18n="footerMade">AI Lab Pro · Made with ❤️</span> ·
-      <a href="https://mylinks.mohamadreza-rezaei.workers.dev/gh-ai-lab-pro" rel="noopener" target="_blank">GitHub</a> ·
-      <a href="/api" rel="noopener" target="_blank">API</a> ·
-      <span data-i18n="version">Version</span> 1.0.0
-    </p>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-mark" aria-hidden="true"></span>
+        <div class="footer-brand-copy">
+          <strong>AI Lab Pro</strong>
+          <span data-i18n="footerTagline">Self-hosted control deck</span>
+        </div>
+      </div>
+
+      <ul class="footer-shortcuts" aria-label="Keyboard shortcuts">
+        <li><kbd>/</kbd> <span data-i18n="helpSearch">Focus search</span></li>
+        <li><kbd>Esc</kbd> <span data-i18n="helpClear">Clear search</span></li>
+        <li><kbd>?</kbd> <span data-i18n="helpHelp">Show this help</span></li>
+        <li class="hide-mobile"><kbd>R</kbd> <span data-i18n="helpRefresh">Refresh status</span></li>
+      </ul>
+
+      <div class="footer-meta">
+        <a href="https://mylinks.mohamadreza-rezaei.workers.dev/gh-ai-lab-pro" rel="noopener" target="_blank">GitHub</a>
+        <a href="/api" rel="noopener" target="_blank">API</a>
+        <a href="/health" rel="noopener" target="_blank" data-i18n="healthCheck">Health Check</a>
+        <span class="footer-version"><span data-i18n="version">Version</span> 1.0.0</span>
+      </div>
+    </div>
   </footer>
 </div>
 
