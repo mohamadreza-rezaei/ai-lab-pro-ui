@@ -72,6 +72,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.5;
+  padding-bottom: 5.5rem;
   transition:
     background 0.4s ease,
     color 0.4s ease;
@@ -146,21 +147,6 @@ body.lang-fa {
   }
 }
 
-.header-actions {
-  position: absolute;
-  top: 0;
-  display: flex;
-  gap: 0.5rem;
-}
-
-[dir='ltr'] .header-actions {
-  right: 0;
-}
-
-[dir='rtl'] .header-actions {
-  left: 0;
-}
-
 .icon-btn {
   width: 42px;
   height: 42px;
@@ -193,6 +179,91 @@ body.lang-fa {
 
 .icon-btn:hover svg {
   transform: scale(1.1) rotate(15deg);
+}
+
+/* Floating control dock — settings stays reachable while scrolling */
+.fab-dock {
+  position: fixed;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  inset-inline-end: max(1rem, env(safe-area-inset-right));
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  pointer-events: none;
+}
+
+.fab {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--card-bg);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+  background: var(--card-hover);
+}
+
+.fab:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.fab svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.fab-secondary {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.05rem;
+}
+
+.fab-primary {
+  width: 3.55rem;
+  height: 3.55rem;
+  border-color: rgba(0, 229, 255, 0.45);
+  background: linear-gradient(145deg, rgba(0, 229, 255, 0.22), rgba(176, 38, 255, 0.2));
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.4),
+    0 0 22px rgba(0, 229, 255, 0.22);
+}
+
+.fab-primary:hover {
+  border-color: var(--accent-cyan);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.45),
+    0 0 28px rgba(0, 229, 255, 0.3);
+}
+
+.fab-primary svg {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+/* Stay out of the way while the settings sheet is open */
+.settings-modal.show ~ .fab-dock {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .logo {
@@ -1145,12 +1216,32 @@ body.lang-fa {
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .container {
-    padding: 4rem 1rem 1rem;
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .header {
+    margin-bottom: 1.75rem;
+  }
+
+  .fab-dock {
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    inset-inline-end: max(0.85rem, env(safe-area-inset-right));
+    gap: 0.45rem;
+  }
+
+  .fab-secondary {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .fab-primary {
+    width: 3.25rem;
+    height: 3.25rem;
   }
 
   .logo img {
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 4.75rem;
+    height: 4.75rem;
   }
 
   .services-grid {
@@ -1162,16 +1253,36 @@ body.lang-fa {
     padding: 0.5rem 0.75rem;
   }
 
-  .header-actions {
-    top: -0.5rem;
+  /* One horizontal strip instead of a tall sticky stack covering the page */
+  .category-tabs {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0.4rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    max-height: 3.25rem;
+    padding: 0.45rem 0.15rem 0.65rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(
+      to bottom,
+      var(--bg) 0%,
+      var(--bg) 85%,
+      transparent 100%
+    );
   }
 
-  [dir='ltr'] .header-actions {
-    right: 0.5rem;
+  .category-tabs::-webkit-scrollbar {
+    display: none;
   }
 
-  [dir='rtl'] .header-actions {
-    left: 0.5rem;
+  .category-tab {
+    flex: 0 0 auto;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.7rem;
   }
 }
 
@@ -1182,6 +1293,20 @@ body.lang-fa {
 
   .service-desc {
     min-height: auto;
+  }
+
+  .logo img {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .category-tabs {
+    max-height: 3rem;
   }
 }
 
