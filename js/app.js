@@ -33,6 +33,7 @@ const i18n = {
     toastSettingsSaved: '⚙️ Settings saved',
     toastInvalidDomain: '❌ Invalid domain',
     toastDomainRequired: '❌ Base domain required for server mode',
+    toastLocalHostRequired: '❌ Local host / IP required for local mode',
     toastSwitchedLocal: '🖥️ Switched to Local',
     toastSwitchedServer: '🌐 Switched to Server',
     allOnline: (n) => `All services active (${n}/${n})`,
@@ -61,12 +62,15 @@ const i18n = {
     allUp: 'All up',
     envLocal: 'Local',
     envServer: 'Server',
-    envLocalDesc: 'localhost ports',
+    envLocalDesc: 'host:port (LAN IP ok)',
     envServerDesc: 'subdomains',
     envBadgeLocal: 'Local',
     envBadgeServer: 'Server',
     settingsTitle: 'Settings',
     environment: 'Environment',
+    localHost: 'Local host / IP',
+    localHostHelp: 'Replaces localhost in local mode (e.g. 192.168.1.23 or http://192.168.1.23/)',
+    localHostPlaceholder: '192.168.1.23',
     baseDomain: 'Base Domain',
     baseDomainHelp: 'Used for subdomain access in server mode (e.g. chat.lab.example.com)',
     litellmApiKey: 'LiteLLM API Key',
@@ -115,6 +119,7 @@ const i18n = {
     toastSettingsSaved: '⚙️ تنظیمات ذخیره شد',
     toastInvalidDomain: '❌ دامنه نامعتبر',
     toastDomainRequired: '❌ برای حالت سرور، دامنه پایه الزامی است',
+    toastLocalHostRequired: '❌ برای حالت محلی، میزبان / IP الزامی است',
     toastSwitchedLocal: '🖥️ تغییر به حالت محلی',
     toastSwitchedServer: '🌐 تغییر به حالت سرور',
     allOnline: (n) => `همه سرویس‌ها فعال (${n}/${n})`,
@@ -143,14 +148,17 @@ const i18n = {
     allUp: 'همه فعال',
     envLocal: 'محلی',
     envServer: 'سرور',
-    envLocalDesc: 'پورت‌های محلی',
+    envLocalDesc: 'میزبان:پورت (IP شبکه خانگی)',
     envServerDesc: 'ساب‌دامین',
     envBadgeLocal: 'محلی',
     envBadgeServer: 'سرور',
     settingsTitle: 'تنظیمات',
     environment: 'محیط',
+    localHost: 'میزبان / IP محلی',
+    localHostHelp: 'جایگزین localhost در حالت محلی (مثلاً 192.168.1.23 یا http://192.168.1.23/)',
+    localHostPlaceholder: '192.168.1.23',
     baseDomain: 'دامنه پایه',
-    baseDomainHelp: 'برای دسترسی ساب‌دامین در حالت سرور (مثلاً chat.lab.example.com)',
+    baseDomainHelp: 'برای ساب‌دامین در حالت سرور (مثلاً chat.lab.example.com)',
     litellmApiKey: 'کلید API لایت‌ال‌ال‌ام',
     litellmApiKeyHelp: 'کلید مجازی برای همین محیط (کلیدهای محلی و سرور جداگانه ذخیره می‌شوند)',
     litellmApiKeyPlaceholder: 'sk-…',
@@ -619,11 +627,32 @@ function migrateLegacyApiKey() {
 
 migrateLegacyApiKey();
 
+/** Normalize pasted LAN URLs: "http://192.168.1.23/" → "192.168.1.23" */
+function normalizeLocalHost(raw) {
+  let host = String(raw || '').trim();
+  if (!host) return '';
+  host = host.replace(/^https?:\/\//i, '');
+  host = host.split('/')[0];
+  host = host.split('@').pop();
+  return host.trim();
+}
+
+function defaultLocalHost() {
+  const stored = localStorage.getItem('localHost');
+  if (stored) return normalizeLocalHost(stored) || 'localhost';
+  const pageHost = window.location.hostname;
+  if (pageHost && !['localhost', '127.0.0.1', '0.0.0.0', ''].includes(pageHost)) {
+    return pageHost;
+  }
+  return 'localhost';
+}
+
 const state = {
   lang: localStorage.getItem('lang') || 'en',
   theme: localStorage.getItem('theme') || 'dark',
   env: localStorage.getItem('env') || (_isLocalhost ? 'local' : 'server'),
   baseDomain: localStorage.getItem('baseDomain') || 'lab.example.com',
+  localHost: defaultLocalHost(),
   startTime: Date.now(),
 };
 
@@ -652,21 +681,21 @@ URL Builders (the core of the routing logic)
 ============================================ */
 function getServiceUrl(svc) {
   if (state.env === 'local') {
-    return `http://localhost:${svc.localPort}${svc.urlPath || ''}`;
+    return `http://${state.localHost}:${svc.localPort}${svc.urlPath || ''}`;
   }
   return `https://${svc.subdomain}.${state.baseDomain}${svc.urlPath || ''}`;
 }
 
 function getServiceHealth(svc) {
   if (state.env === 'local') {
-    return `http://localhost:${svc.localPort}${svc.healthPath || '/'}`;
+    return `http://${state.localHost}:${svc.localPort}${svc.healthPath || '/'}`;
   }
   return `https://${svc.subdomain}.${state.baseDomain}${svc.healthPath || '/'}`;
 }
 
 function getServiceDisplay(svc) {
   if (state.env === 'local') {
-    return `localhost:${svc.localPort}${svc.urlPath || ''}`;
+    return `${state.localHost}:${svc.localPort}${svc.urlPath || ''}`;
   }
   return `${svc.subdomain}.${state.baseDomain}${svc.urlPath || ''}`;
 }
@@ -676,7 +705,7 @@ function getApiBaseUrl() {
   const litellm = services.find((s) => s.name === 'LiteLLM');
   if (!litellm) return window.location.origin;
   if (state.env === 'local') {
-    return `http://localhost:${litellm.localPort}`;
+    return `http://${state.localHost}:${litellm.localPort}`;
   }
   return `https://${litellm.subdomain}.${state.baseDomain}`;
 }
@@ -810,15 +839,26 @@ function stashApiKeyDraftFromInput() {
   settingsDraftKeys[bound] = apiKeyInput.value;
 }
 
+function syncSettingsEnvFields(env) {
+  const localGroup = document.getElementById('setting-local-host');
+  const domainGroup = document.getElementById('setting-base-domain');
+  const isLocal = env === 'local';
+  if (localGroup) localGroup.hidden = !isLocal;
+  if (domainGroup) domainGroup.hidden = isLocal;
+}
+
 function openSettings() {
   const modal = document.getElementById('settings-modal');
   const baseDomainInput = document.getElementById('base-domain');
+  const localHostInput = document.getElementById('local-host');
   settingsDraftKeys.local = getLitellmApiKey('local');
   settingsDraftKeys.server = getLitellmApiKey('server');
   document.getElementById('env-local').checked = state.env === 'local';
   document.getElementById('env-server').checked = state.env === 'server';
   baseDomainInput.value = state.baseDomain;
-  baseDomainInput.disabled = state.env === 'local';
+  baseDomainInput.disabled = false;
+  if (localHostInput) localHostInput.value = state.localHost;
+  syncSettingsEnvFields(state.env);
   syncApiKeyField(state.env);
   modal.classList.add('show');
 }
@@ -836,10 +876,18 @@ function closeSettingsDirect() {
 function saveSettings() {
   const newEnv = document.querySelector('input[name="env"]:checked').value;
   const newDomain = document.getElementById('base-domain').value.trim();
+  const localHostInput = document.getElementById('local-host');
+  const newLocalHost = normalizeLocalHost(
+    localHostInput ? localHostInput.value : state.localHost,
+  );
   const tr = t();
 
   if (newEnv === 'server' && !newDomain) {
     showToast(tr.toastDomainRequired);
+    return;
+  }
+  if (newEnv === 'local' && !newLocalHost) {
+    showToast(tr.toastLocalHostRequired);
     return;
   }
 
@@ -852,13 +900,16 @@ function saveSettings() {
 
   const envChanged = newEnv !== state.env;
   const domainChanged = newDomain && newDomain !== state.baseDomain;
+  const hostChanged = newLocalHost !== state.localHost;
   const keyChanged = nextLocal !== prevLocal || nextServer !== prevServer;
 
   state.env = newEnv;
   if (newDomain) state.baseDomain = newDomain;
+  if (newLocalHost) state.localHost = newLocalHost;
 
   localStorage.setItem('env', state.env);
   localStorage.setItem('baseDomain', state.baseDomain);
+  localStorage.setItem('localHost', state.localHost);
   setLitellmApiKey(nextLocal, 'local');
   setLitellmApiKey(nextServer, 'server');
   settingsDraftKeys.local = nextLocal;
@@ -868,7 +919,7 @@ function saveSettings() {
   closeSettingsDirect();
   showToast(tr.toastSettingsSaved);
 
-  if (envChanged || domainChanged) {
+  if (envChanged || domainChanged || hostChanged) {
     renderServices();
     refreshStatus();
   } else if (keyChanged) {
@@ -880,7 +931,7 @@ function setupSettingsListeners() {
   document.querySelectorAll('input[name="env"]').forEach((radio) => {
     radio.addEventListener('change', (e) => {
       stashApiKeyDraftFromInput();
-      document.getElementById('base-domain').disabled = e.target.value === 'local';
+      syncSettingsEnvFields(e.target.value);
       syncApiKeyField(e.target.value);
     });
   });
@@ -1852,7 +1903,13 @@ function init() {
     'color: #00e5ff; font-size: 16px; font-weight: bold;',
   );
   console.log(
-    '%cEnvironment: ' + state.env + ' (' + state.baseDomain + ')',
+    '%cEnvironment: ' +
+      state.env +
+      ' (localHost=' +
+      state.localHost +
+      ', baseDomain=' +
+      state.baseDomain +
+      ')',
     'color: #b026ff; font-size: 12px;',
   );
 }
