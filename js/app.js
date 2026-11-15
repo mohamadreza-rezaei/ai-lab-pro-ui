@@ -1637,13 +1637,15 @@ async function checkStatus(el) {
   const busted = withCacheBust(endpoint);
   const viaProbe = isDashProbeUrl(endpoint);
 
-  // CORS-only. Never use mode:'no-cors' — opaque Responses can resolve on refused ports.
+  // Prefer CORS so /dash/probe status codes are readable. Most LAN apps omit ACAO,
+  // so a failed CORS fetch falls back to no-cors reachability (opaque = answered).
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
   try {
     const res = await fetch(busted, {
       method: 'GET',
       mode: 'cors',
+      cache: 'no-store',
       signal: controller.signal,
     });
     if (viaProbe) {
@@ -1656,8 +1658,26 @@ async function checkStatus(el) {
       return;
     }
     markStatus(el, 'offline');
-  } catch (e) {
-    markStatus(el, 'error');
+  } catch {
+    if (viaProbe) {
+      markStatus(el, 'error');
+      return;
+    }
+    // Standalone UI (pages.dev / webpack): CORS blocks Grafana etc. even when live.
+    try {
+      const c2 = new AbortController();
+      const t2 = setTimeout(() => c2.abort(), 4000);
+      await fetch(busted, {
+        method: 'GET',
+        mode: 'no-cors',
+        cache: 'no-store',
+        signal: c2.signal,
+      });
+      clearTimeout(t2);
+      markStatus(el, 'online');
+    } catch {
+      markStatus(el, 'offline');
+    }
   } finally {
     clearTimeout(timeoutId);
   }
