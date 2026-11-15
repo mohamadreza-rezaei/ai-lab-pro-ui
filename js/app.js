@@ -53,6 +53,7 @@ const i18n = {
     catObservability: 'Observability',
     catSecurity: 'Security & Identity',
     catPlatform: 'Platform & Ops',
+    catProductivity: 'Docs & Projects',
     catGrowth: 'Marketing & Content',
     catSpecialty: 'Specialty Apps',
     statusOnline: '● Online',
@@ -139,6 +140,7 @@ const i18n = {
     catObservability: 'مشاهده‌پذیری',
     catSecurity: 'امنیت و هویت',
     catPlatform: 'پلتفرم و عملیات',
+    catProductivity: 'اسناد و پروژه‌ها',
     catGrowth: 'مارکتینگ و محتوا',
     catSpecialty: 'اپ‌های تخصصی',
     statusOnline: '● آنلاین',
@@ -182,7 +184,8 @@ const FEATURED_ROTATE_MS = 5000;
 Service Data
 Categories (display order):
   chat → gateways → builders → agents → media → knowledge →
-  automation → data → observability → security → platform → growth → specialty
+  automation → data → observability → security → platform →
+  productivity → growth → specialty
 ============================================ */
 const services = [
   /* —— Chat & Interfaces —— */
@@ -211,6 +214,19 @@ const services = [
   },
 
   /* —— Gateways & Proxies —— */
+  {
+    name: 'Ollama',
+    icon: '🦙',
+    category: 'gateways',
+    desc: {
+      en: 'Local LLM runtime (extra profile)',
+      fa: 'رانتایم LLM محلی (پروفایل extra)',
+    },
+    localPort: 11434,
+    subdomain: 'ollama',
+    urlPath: '/',
+    healthPath: '/',
+  },
   {
     name: 'LiteLLM',
     icon: '🤖',
@@ -327,29 +343,29 @@ const services = [
     urlPath: '/',
     healthPath: '/health',
   },
-  // {
-  //   name: 'OpenBot',
-  //   icon: '🤖',
-  //   category: 'agents',
-  //   desc: {
-  //     en: 'AI coworker platform with browser automation',
-  //     fa: 'پلتفرم هم‌کار هوش مصنوعی با اتوماسیون مرورگر',
-  //   },
-  //   localPort: 3012,
-  //   subdomain: 'openbot',
-  //   urlPath: '/',
-  //   healthPath: '/',
-  // },
-  // {
-  //   name: 'Multica',
-  //   icon: '🧩',
-  //   category: 'agents',
-  //   desc: {en: 'AI agent workspace and task board', fa: 'فضای کار عامل هوش مصنوعی و تابلو کار'},
-  //   localPort: 3004,
-  //   subdomain: 'multica',
-  //   urlPath: '/',
-  //   healthPath: '/',
-  // },
+  {
+    name: 'OpenBot',
+    icon: '🤖',
+    category: 'agents',
+    desc: {
+      en: 'AI coworker platform with browser automation',
+      fa: 'پلتفرم هم‌کار هوش مصنوعی با اتوماسیون مرورگر',
+    },
+    localPort: 3012,
+    subdomain: 'openbot',
+    urlPath: '/',
+    healthPath: '/',
+  },
+  {
+    name: 'Multica',
+    icon: '🧩',
+    category: 'agents',
+    desc: {en: 'AI agent workspace and task board', fa: 'فضای کار عامل هوش مصنوعی و تابلو کار'},
+    localPort: 3004,
+    subdomain: 'multica',
+    urlPath: '/',
+    healthPath: '/',
+  },
   {
     name: 'MemWal',
     icon: '🧠',
@@ -379,6 +395,19 @@ const services = [
     healthPath: '/',
   },
   {
+    name: 'Open Design',
+    icon: '🎨',
+    category: 'media',
+    desc: {
+      en: 'Collaborative AI design agent workspace',
+      fa: 'فضای کار طراحی مشارکتی با عامل هوش مصنوعی',
+    },
+    localPort: 7456,
+    subdomain: 'open-design',
+    urlPath: '/',
+    healthPath: '/api/health',
+  },
+  {
     name: 'Voicebox',
     icon: '🔊',
     category: 'media',
@@ -387,6 +416,19 @@ const services = [
     subdomain: 'voicebox',
     urlPath: '/',
     healthPath: '/health',
+  },
+  {
+    name: 'OpenMontage',
+    icon: '🎞️',
+    category: 'media',
+    desc: {
+      en: 'AI video montage and backlot studio',
+      fa: 'استودیوی مونتاژ ویدیو و بک‌لات با هوش مصنوعی',
+    },
+    localPort: 4750,
+    subdomain: 'openmontage',
+    urlPath: '/',
+    healthPath: '/api/health',
   },
 
   /* —— Knowledge & Research —— */
@@ -550,6 +592,67 @@ const services = [
     urlPath: '/',
     healthPath: '/api/system/status',
   },
+  {
+    name: 'cAdvisor',
+    icon: '📟',
+    category: 'platform',
+    desc: {
+      en: 'Container resource metrics UI',
+      fa: 'رابط متریک‌های منابع کانتینر',
+    },
+    localPort: 8088,
+    subdomain: 'cadvisor',
+    urlPath: '/',
+    healthPath: '/healthz',
+  },
+  {
+    name: 'GitLab',
+    icon: '🦊',
+    category: 'platform',
+    desc: {en: 'Self-hosted Git and CI/CD', fa: 'گیت و CI/CD خودمیزبان'},
+    localPort: 8929,
+    subdomain: 'gitlab',
+    urlPath: '/',
+    healthPath: '/-/health',
+  },
+  {
+    name: 'pgAdmin',
+    icon: '🐘',
+    category: 'platform',
+    desc: {en: 'PostgreSQL administration UI', fa: 'رابط مدیریت PostgreSQL'},
+    localPort: 5050,
+    subdomain: 'pgadmin',
+    urlPath: '/',
+    healthPath: '/misc/ping',
+  },
+
+  /* —— Docs & Projects —— */
+  {
+    name: 'AFFiNE',
+    icon: '📝',
+    category: 'productivity',
+    desc: {
+      en: 'Docs, whiteboard, and knowledge canvas',
+      fa: 'اسناد، وایت‌برد و بوم دانش',
+    },
+    localPort: 3015,
+    subdomain: 'affine',
+    urlPath: '/',
+    healthPath: '/',
+  },
+  {
+    name: 'Plane',
+    icon: '📋',
+    category: 'productivity',
+    desc: {
+      en: 'Project management for sprints and issues',
+      fa: 'مدیریت پروژه برای اسپرینت و تسک',
+    },
+    localPort: 8095,
+    subdomain: 'plane',
+    urlPath: '/',
+    healthPath: '/',
+  },
 
   /* —— Marketing & Content —— */
   {
@@ -573,7 +676,7 @@ const services = [
     localPort: 8093,
     subdomain: 'instatic',
     urlPath: '/',
-    healthPath: '/',
+    healthPath: '/health',
   },
 
   /* —— Specialty Apps —— */
@@ -601,6 +704,7 @@ const categoryConfig = {
   observability: {icon: '📡', key: 'catObservability'},
   security: {icon: '🔐', key: 'catSecurity'},
   platform: {icon: '🖥️', key: 'catPlatform'},
+  productivity: {icon: '📐', key: 'catProductivity'},
   growth: {icon: '📣', key: 'catGrowth'},
   specialty: {icon: '🧩', key: 'catSpecialty'},
 };
