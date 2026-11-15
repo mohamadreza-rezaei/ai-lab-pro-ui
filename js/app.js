@@ -467,7 +467,8 @@ const services = [
     localPort: 9090,
     subdomain: 'prometheus',
     urlPath: '/',
-    healthPath: '/-/healthy',
+    // Prometheus is served under web.external-url / --web.route-prefix=/prometheus
+    healthPath: '/prometheus/-/healthy',
   },
   {
     name: 'Grafana',
@@ -594,8 +595,32 @@ const categoryConfig = {
 /* ============================================
 State
 ============================================ */
-// Auto-detect environment based on hostname
-const _isLocalhost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+/** Loopback, RFC1918 LAN IPs, and *.local → default to Local lab mode. */
+function isLocalLabHost(hostname) {
+  const h = String(hostname || '')
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '');
+  if (!h || h === 'localhost' || h === '0.0.0.0' || h === '::1' || h === '127.0.0.1') {
+    return true;
+  }
+  if (h.endsWith('.local')) return true;
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
+  if (!m) return false;
+  const a = Number(m[1]);
+  const b = Number(m[2]);
+  if (a === 10 || a === 127) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  return false;
+}
+
+const _isLocalLabHost = isLocalLabHost(window.location.hostname);
+const _isLocalhost = _isLocalLabHost;
+
+function defaultEnv() {
+  return localStorage.getItem('env') || (_isLocalLabHost ? 'local' : 'server');
+}
 
 function apiKeyStorageKey(env) {
   return env === 'server' ? 'litellmApiKeyServer' : 'litellmApiKeyLocal';
@@ -603,10 +628,7 @@ function apiKeyStorageKey(env) {
 
 function getLitellmApiKey(env) {
   const resolved =
-    env ||
-    (typeof state !== 'undefined' && state.env) ||
-    localStorage.getItem('env') ||
-    (_isLocalhost ? 'local' : 'server');
+    env || (typeof state !== 'undefined' && state.env) || defaultEnv();
   return localStorage.getItem(apiKeyStorageKey(resolved)) || '';
 }
 
@@ -620,7 +642,7 @@ function setLitellmApiKey(key, env) {
 function migrateLegacyApiKey() {
   const legacy = localStorage.getItem('litellmApiKey');
   if (!legacy) return;
-  const env = localStorage.getItem('env') || (_isLocalhost ? 'local' : 'server');
+  const env = defaultEnv();
   if (!getLitellmApiKey(env)) setLitellmApiKey(legacy, env);
   localStorage.removeItem('litellmApiKey');
 }
@@ -641,7 +663,7 @@ function defaultLocalHost() {
   const stored = localStorage.getItem('localHost');
   if (stored) return normalizeLocalHost(stored) || 'localhost';
   const pageHost = window.location.hostname;
-  if (pageHost && !['localhost', '127.0.0.1', '0.0.0.0', ''].includes(pageHost)) {
+  if (pageHost && !['localhost', '127.0.0.1', '0.0.0.0', '::1', ''].includes(pageHost)) {
     return pageHost;
   }
   return 'localhost';
@@ -650,7 +672,7 @@ function defaultLocalHost() {
 const state = {
   lang: localStorage.getItem('lang') || 'en',
   theme: localStorage.getItem('theme') || 'dark',
-  env: localStorage.getItem('env') || (_isLocalhost ? 'local' : 'server'),
+  env: defaultEnv(),
   baseDomain: localStorage.getItem('baseDomain') || 'lab.example.com',
   localHost: defaultLocalHost(),
   startTime: Date.now(),
@@ -687,10 +709,17 @@ function getServiceUrl(svc) {
 }
 
 function getServiceHealth(svc) {
+  const path = svc.healthPath || '/';
+  const normalized = path.startsWith('/') ? path : `/${path}`;
   if (state.env === 'local') {
-    return `http://${state.localHost}:${svc.localPort}${svc.healthPath || '/'}`;
+    // Prefer same-origin /dash/probe/<port>/… (nginx → host port). Opaque no-cors
+    // responses are NOT trustworthy — browsers can resolve them even when refused.
+    if (typeof window !== 'undefined' && window.location.pathname.includes('/dash')) {
+      return `${window.location.origin}/dash/probe/${svc.localPort}${normalized}`;
+    }
+    return `http://${state.localHost}:${svc.localPort}${normalized}`;
   }
-  return `https://${svc.subdomain}.${state.baseDomain}${svc.healthPath || '/'}`;
+  return `https://${svc.subdomain}.${state.baseDomain}${normalized}`;
 }
 
 function getServiceDisplay(svc) {
@@ -1442,48 +1471,78 @@ function renderServices() {
 /* ============================================
 Status Checking
 ============================================ */
+/**
+ * Same-origin /dash/probe responses:
+ * - 2xx/3xx = healthy endpoint answered
+ * - 401/403 = process up (auth wall)
+ * - 404/502/etc = wrong path or unreachable — NOT online
+ */
+function isProbeHealthyStatus(status) {
+  if (!Number.isFinite(status) || status <= 0) return false;
+  if (status >= 200 && status < 400) return true;
+  if (status === 401 || status === 403) return true;
+  return false;
+}
+
+function isDashProbeUrl(url) {
+  try {
+    return new URL(url, window.location.href).pathname.includes('/dash/probe/');
+  } catch {
+    return String(url).includes('/dash/probe/');
+  }
+}
+
+function withCacheBust(url) {
+  try {
+    const u = new URL(url, window.location.href);
+    u.searchParams.set('_', String(Date.now()));
+    return u.toString();
+  } catch {
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}_=${Date.now()}`;
+  }
+}
+
+function markStatus(el, kind) {
+  const tr = t();
+  if (kind === 'online') {
+    el.className = 'status-badge online';
+    el.textContent = tr.statusOnline;
+    return;
+  }
+  el.className = 'status-badge offline';
+  el.textContent = kind === 'offline' ? tr.statusOffline : tr.statusError;
+}
+
 async function checkStatus(el) {
   const endpoint = el.dataset.health;
   if (!endpoint) return;
-  const tr = t();
+  const busted = withCacheBust(endpoint);
+  const viaProbe = isDashProbeUrl(endpoint);
 
-  // Try CORS first
+  // CORS-only. Never use mode:'no-cors' — opaque Responses can resolve on refused ports.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(endpoint, {
+    const res = await fetch(busted, {
       method: 'GET',
       mode: 'cors',
-      cache: 'no-store',
       signal: controller.signal,
     });
-    clearTimeout(timeoutId);
-
-    if (res.ok || res.status === 302 || res.status === 301) {
-      el.className = 'status-badge online';
-      el.textContent = tr.statusOnline;
+    if (viaProbe) {
+      markStatus(el, isProbeHealthyStatus(res.status) ? 'online' : 'offline');
       return;
     }
-    el.className = 'status-badge offline';
-    el.textContent = tr.statusOffline;
-  } catch (e) {
-    // CORS blocked or network error - try no-cors as fallback
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      await fetch(endpoint, {
-        method: 'GET',
-        mode: 'no-cors',
-        cache: 'no-store',
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-      el.className = 'status-badge online';
-      el.textContent = tr.statusOnline;
-    } catch (e2) {
-      el.className = 'status-badge offline';
-      el.textContent = tr.statusError;
+    // Direct cross-origin: any real HTTP status means the process answered.
+    if (Number.isFinite(res.status) && res.status > 0) {
+      markStatus(el, 'online');
+      return;
     }
+    markStatus(el, 'offline');
+  } catch (e) {
+    markStatus(el, 'error');
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 

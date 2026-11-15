@@ -1,5 +1,5 @@
 /* AI Lab Pro — service worker (cache shell, network for APIs) */
-const CACHE_VERSION = 'ailab-ui-v1.6.2';
+const CACHE_VERSION = 'ailab-ui-v1.7.3';
 const SHELL = [
   './',
   './index.html',
@@ -41,6 +41,7 @@ function isDynamic(url) {
   return (
     url.pathname.includes('/api/models') ||
     url.pathname.includes('/v1/models') ||
+    url.pathname.includes('/dash/probe/') ||
     url.origin !== self.location.origin
   );
 }
@@ -52,7 +53,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (isDynamic(url)) {
-    event.respondWith(fetch(request).catch(() => caches.match(request)));
+    // Network-only — never cache-fallback (would fake health as Online).
+    event.respondWith(fetch(request));
     return;
   }
 
