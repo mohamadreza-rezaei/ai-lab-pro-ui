@@ -302,6 +302,19 @@ const services = [
     healthPath: '/',
   },
   {
+    name: 'OpenMausBot',
+    icon: '🐭',
+    category: 'agents',
+    desc: {
+      en: 'OpenMausBot harness — connect desktop clients to the LAN server',
+      fa: 'هارنس OpenMausBot — اتصال کلاینت دسکتاپ به سرور LAN',
+    },
+    localPort: 8799,
+    subdomain: 'openmausbot',
+    urlPath: '/',
+    healthPath: '/',
+  },
+  {
     name: 'Moyai',
     icon: '🗿',
     category: 'agents',
