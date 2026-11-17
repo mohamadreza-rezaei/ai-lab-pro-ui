@@ -8,7 +8,16 @@ module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
   watchOptions: {
-    ignored: /node_modules/,
+    ignored: [
+      '**/node_modules/**',
+      '**/vendor/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/coverage/**',
+      '**/.nyc_output/**',
+      '**/.cache/**',
+      '**/.git/**',
+    ],
   },
   devServer: {
     liveReload: true,
@@ -18,13 +27,29 @@ module.exports = merge(common, {
     static: {
       directory: path.resolve(__dirname),
       watch: {
-        ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
+        ignored: [
+          '**/node_modules/**',
+          '**/vendor/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/coverage/**',
+          '**/.nyc_output/**',
+          '**/.cache/**',
+          '**/.git/**',
+        ],
       },
     },
     watchFiles: {
       paths: ['index.html', 'js/**/*.js', 'css/**/*.css', 'img/**/*', 'icons/**/*'],
       options: {
-        ignored: /node_modules/,
+        ignored: [
+          '**/node_modules/**',
+          '**/vendor/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/coverage/**',
+          '**/.git/**',
+        ],
       },
     },
   },
