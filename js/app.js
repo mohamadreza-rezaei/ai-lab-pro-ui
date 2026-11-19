@@ -83,6 +83,7 @@ const i18n = {
     featuredTitle: 'Featured',
     featuredPrev: 'Previous featured',
     featuredNext: 'Next featured',
+    profilesAria: 'Compose profiles',
     cancel: 'Cancel',
     save: 'Save',
   },
@@ -170,6 +171,7 @@ const i18n = {
     featuredTitle: 'ویژه',
     featuredPrev: 'قبلی',
     featuredNext: 'بعدی',
+    profilesAria: 'پروفایل‌های Compose',
     cancel: 'انصراف',
     save: 'ذخیره',
   },
@@ -177,6 +179,63 @@ const i18n = {
 
 /* Featured service names (order = carousel order). Add more anytime. */
 const FEATURED_SERVICE_NAMES = ['Open WebUI', 'LiteLLM', 'Grafana', 'Mattermost', 'Portainer'];
+
+/* Compose profiles from /var/www/ai-lab-pro/docker-compose.yml and services/*.yml.
+   No `profiles:` key means the default profile (make up). Tab order matches that header. */
+const PROFILE_ORDER = ['all', 'default', 'full', 'monitoring', 'extra', 'seo'];
+const DEFAULT_PROFILE = 'default';
+
+const serviceProfile = {
+  'Open WebUI': 'default',
+  LiteLLM: 'default',
+  OpenClaw: 'default',
+  OpenMausBot: 'default',
+  n8n: 'default',
+  pgAdmin: 'default',
+  Ollama: 'extra',
+  LibreChat: 'full',
+  OmniRoute: 'full',
+  '9Router': 'full',
+  Flowise: 'full',
+  Langflow: 'full',
+  Dify: 'full',
+  'Hermes Agent': 'full',
+  Moyai: 'full',
+  OpenBot: 'full',
+  Multica: 'full',
+  MemWal: 'full',
+  'Open Generative AI': 'full',
+  'Open Design': 'full',
+  Voicebox: 'full',
+  OpenMontage: 'full',
+  'Open Notebook': 'full',
+  'Home Assistant': 'full',
+  Qdrant: 'full',
+  'MinIO Console': 'full',
+  'MinIO API': 'full',
+  Langfuse: 'full',
+  OpenPanel: 'full',
+  Authentik: 'full',
+  Infisical: 'full',
+  Portainer: 'full',
+  GitLab: 'full',
+  AFFiNE: 'full',
+  Plane: 'full',
+  Instatic: 'full',
+  OpenTerminal: 'full',
+  Prometheus: 'monitoring',
+  Grafana: 'monitoring',
+  Mattermost: 'monitoring',
+  cAdvisor: 'monitoring',
+  OpenSEO: 'seo',
+};
+
+let activeProfile = DEFAULT_PROFILE;
+
+function servicesForProfile(profile) {
+  if (profile === 'all') return services;
+  return services.filter((svc) => serviceProfile[svc.name] === profile);
+}
 const FEATURED_VISIBLE = 3;
 const FEATURED_ROTATE_MS = 5000;
 
@@ -1102,14 +1161,67 @@ function setupSettingsListeners() {
 /* ============================================
 Category Tabs
 ============================================ */
+function renderProfileTabs() {
+  const tabs = document.getElementById('profile-tabs');
+  if (!tabs) return;
+  tabs.setAttribute('aria-label', t().profilesAria);
+  tabs.innerHTML = PROFILE_ORDER.map((id) => {
+    const selected = id === activeProfile;
+    const count = servicesForProfile(id).length;
+    return `
+      <button type="button" class="category-tab${selected ? ' active' : ''}" role="tab"
+        id="profile-tab-${id}" data-profile="${id}" aria-selected="${selected ? 'true' : 'false'}"
+        aria-controls="main-content" tabindex="${selected ? '0' : '-1'}">
+        <span class="category-tab-label">${id}</span>
+        <span class="category-tab-count">${count}</span>
+      </button>`;
+  }).join('');
+}
+
+function selectProfile(id) {
+  if (!PROFILE_ORDER.includes(id) || id === activeProfile) return;
+  activeProfile = id;
+  renderServices();
+  document.getElementById(`profile-tab-${id}`)?.focus();
+}
+
+function setupProfileTabs() {
+  const tabs = document.getElementById('profile-tabs');
+  if (!tabs || tabs.dataset.bound) return;
+  tabs.dataset.bound = '1';
+
+  tabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-profile]');
+    if (!btn) return;
+    selectProfile(btn.dataset.profile);
+  });
+
+  tabs.addEventListener('keydown', (e) => {
+    const current = PROFILE_ORDER.indexOf(activeProfile);
+    if (current < 0) return;
+    const rtl = document.documentElement.dir === 'rtl';
+    const forwardKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+    const backKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+    let next = current;
+    if (e.key === forwardKey) next = (current + 1) % PROFILE_ORDER.length;
+    else if (e.key === backKey) next = (current - 1 + PROFILE_ORDER.length) % PROFILE_ORDER.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = PROFILE_ORDER.length - 1;
+    else return;
+    e.preventDefault();
+    selectProfile(PROFILE_ORDER[next]);
+  });
+}
+
 function renderCategoryTabs() {
   const tabs = document.getElementById('category-tabs');
   if (!tabs) return;
   const tr = t();
   const parts = [];
+  const visible = servicesForProfile(activeProfile);
 
   Object.keys(categoryConfig).forEach((catKey) => {
-    const count = services.filter((s) => s.category === catKey).length;
+    const count = visible.filter((s) => s.category === catKey).length;
     if (count === 0) return;
     const cat = categoryConfig[catKey];
     parts.push(`
@@ -1167,9 +1279,9 @@ function setupCategoryTabs() {
 Render Services
 ============================================ */
 function getFeaturedServices() {
-  return FEATURED_SERVICE_NAMES.map((name) => services.find((s) => s.name === name)).filter(
-    Boolean,
-  );
+  return FEATURED_SERVICE_NAMES.map((name) => services.find((s) => s.name === name))
+    .filter(Boolean)
+    .filter((svc) => activeProfile === 'all' || serviceProfile[svc.name] === activeProfile);
 }
 
 function getFeaturedVisibleCount(total) {
@@ -1267,6 +1379,8 @@ function renderFeatured() {
 
   if (!featured.length) {
     section.hidden = true;
+    track.innerHTML = '';
+    dots.innerHTML = '';
     stopFeaturedCarousel();
     return;
   }
@@ -1523,11 +1637,14 @@ function renderServices() {
   let html = '';
   let cardIndex = 0;
 
+  renderProfileTabs();
   renderFeatured();
   renderCategoryTabs();
 
   Object.keys(categoryConfig).forEach((catKey) => {
-    const catServices = services.filter((s) => s.category === catKey);
+    const catServices = services.filter(
+      (s) => s.category === catKey && (activeProfile === 'all' || serviceProfile[s.name] === activeProfile),
+    );
     if (catServices.length === 0) return;
     const cat = categoryConfig[catKey];
 
@@ -2076,6 +2193,7 @@ function init() {
   setupRipple();
   setupKeyboard();
   setupSettingsListeners();
+  setupProfileTabs();
   setupCategoryTabs();
   setupFeaturedCarousel();
   updateMeta();

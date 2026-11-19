@@ -940,6 +940,21 @@ body.lang-fa #date {
   color: var(--accent-cyan);
 }
 
+.category-tab:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Profile switcher sits above the list; category tabs stay the sticky strip. */
+.category-tabs.profile-tabs {
+  position: static;
+  z-index: auto;
+  top: auto;
+  background: none;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.15rem;
+}
+
 /* ========== Categories ========== */
 .category {
   margin-bottom: 2.5rem;
